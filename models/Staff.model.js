@@ -4,7 +4,7 @@ const { Schema, model } = require("mongoose");
 
 const randomGender = Math.round(Math.random() + 1) === 0 ? "women" : "men";
 
-const userSchema = new Schema(
+const staffSchema = new Schema(
   {
     email: {
       type: String,
@@ -12,9 +12,6 @@ const userSchema = new Schema(
       require: true,
       lowercase: true,
       // unique: true -> Ideally, should be unique, but its up to you
-    },
-    name: {
-      type: String,
     },
     hashedPassword: { type: String, required: true },
     profileImg: {
@@ -37,13 +34,13 @@ const userSchema = new Schema(
     timestamps: true,
   }
 );
-userSchema.virtual("id").get(function () {
+staffSchema.virtual("id").get(function () {
   return this._id.toHexString();
 });
-userSchema.set("toJSON", {
+staffSchema.set("toJSON", {
   virtuals: true,
 });
 
-const User = model("User", userSchema);
+const Staff = model("Staff", staffSchema);
 
-module.exports = User;
+module.exports = Staff;
