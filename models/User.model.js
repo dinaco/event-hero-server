@@ -9,12 +9,11 @@ const userSchema = new Schema(
     email: {
       type: String,
       unique: true,
-      require: true,
-      lowercase: true,
-      // unique: true -> Ideally, should be unique, but its up to you
+      required: true,
     },
     name: {
       type: String,
+      required: true,
     },
     hashedPassword: { type: String, required: true },
     profileImg: {
@@ -25,12 +24,12 @@ const userSchema = new Schema(
     },
     balance: { type: Number, min: 0, default: 0 },
     events: [{ type: Schema.Types.ObjectId, ref: "Event" }],
-    type: {
+    role: {
       type: String,
-      enum: ["user", "app-admin", "event-admin", "event-staff"],
-      required: true,
+      enum: ["customer", "app-admin", "event-admin", "event-staff"],
+      default: "customer",
     },
-    active: { type: Boolean, required: true, default: true },
+    active: { type: Boolean, default: true },
   },
   {
     // this second object adds extra properties: `createdAt` and `updatedAt`

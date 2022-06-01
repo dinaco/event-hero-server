@@ -8,7 +8,6 @@ const productSchema = new Schema(
       type: String,
       require: true,
     },
-    date: { type: Date, require: true },
     productImg: {
       type: String,
       default: `https://www.heineken.com/media-az/01pfxdqq/heineken-original-bottle.png?quality=85`,
@@ -18,7 +17,7 @@ const productSchema = new Schema(
       require: true,
     },
     price: { type: Number, min: 0, required: true },
-    events: [{ type: Schema.Types.ObjectId, ref: "Event" }],
+    event: { type: Schema.Types.ObjectId, ref: "Event" },
     active: { type: Boolean, required: true, default: true },
   },
   {

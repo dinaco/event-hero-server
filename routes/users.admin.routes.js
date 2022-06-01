@@ -2,15 +2,11 @@ const router = require("express").Router();
 const User = require("../models/User.model");
 const Event = require("../models/Event.model");
 
-// Require necessary (isLoggedOut and isLiggedIn) middleware in order to control access to specific routes
-const isLoggedOut = require("../middleware/isLoggedOut");
-const isLoggedIn = require("../middleware/isLoggedIn");
-
 router.get("/users", (req, res, next) => {
   // let collectionLength = 0;
   const { _end, _order, _sort, _start, q = "" } = req.query;
-  console.log(req.query);
-  User.find({ email: { $regex: "^" + q } })
+  // console.log(req.query);
+  User.find({ name: { $regex: "^" + q } })
     .populate("events")
     /*  .count({}, function (err, count) {
       collectionLength = count;
@@ -34,6 +30,12 @@ router.get("/users", (req, res, next) => {
 router.get("/users/:id", (req, res, next) => {
   const { id } = req.params;
   User.findById(id)
+    .then((user) => res.json(user))
+    .catch((err) => next(err));
+});
+router.put("/users/:id", (req, res, next) => {
+  const { id } = req.params;
+  User.findByIdAndUpdate(id, req.body)
     .then((user) => res.json(user))
     .catch((err) => next(err));
 });

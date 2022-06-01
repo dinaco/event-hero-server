@@ -14,18 +14,23 @@ const app = express();
 // ℹ️ This function is getting exported from the config folder. It runs most pieces of middleware
 require("./config")(app);
 
+const { isAuthenticated } = require("./middleware/jwt.middleware");
 // 👇 Start handling routes here
 // Contrary to the views version, all routes are controlled from the routes/index.js
 const allRoutes = require("./routes/index.routes");
 app.use("/api", allRoutes);
-const eventRoutes = require("./routes/event.routes");
-app.use("/api", eventRoutes);
 const authRoutes = require("./routes/auth.routes");
 app.use("/auth", authRoutes);
+const eventRoutes = require("./routes/event.routes");
+app.use("/api", eventRoutes);
+const accountRoutes = require("./routes/account.routes");
+app.use("/api", isAuthenticated, accountRoutes);
 const usersAdminRoutes = require("./routes/users.admin.routes");
 app.use("/api/admin", usersAdminRoutes);
 const eventsAdminRoutes = require("./routes/events.admin.routes");
 app.use("/api/admin", eventsAdminRoutes);
+const productsAdminRoutes = require("./routes/products.admin.routes");
+app.use("/api/admin", productsAdminRoutes);
 
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes
 require("./error-handling")(app);

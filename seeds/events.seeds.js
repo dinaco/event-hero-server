@@ -23,12 +23,22 @@ const randomEvents = async () => {
       name: "Rock in Rio",
       date: new Date("2022-12-17T03:24:00"),
       type: "normal",
+      description:
+        "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Architecto voluptate facere dignissimos fugit minus hic, suscipit consequuntur eius totam ipsa quisquam unde ratione ex pariatur recusandae similique iure fugiat fuga?",
     },
-    { name: "Burnman", date: new Date("2022-08-17T03:24:00"), type: "normal" },
+    {
+      name: "Burnman",
+      date: new Date("2022-08-17T03:24:00"),
+      type: "normal",
+      description:
+        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Id voluptates perferendis maiores delectus totam cumque, dolor voluptatem, debitis aspernatur iste quasi? Nihil corporis nesciunt, rerum inventore deleniti explicabo excepturi repellendus.",
+    },
     {
       name: "F1 race",
       date: new Date("2022-05-17T03:24:00"),
       type: "open-bar",
+      description:
+        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas ex dolore dolorum quam porro illum laboriosam voluptate debitis praesentium voluptates doloremque unde facilis quod, distinctio officiis nemo culpa quisquam maxime.",
     },
   ];
   const userIds = [];
