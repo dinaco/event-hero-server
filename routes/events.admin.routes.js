@@ -7,7 +7,7 @@ router.get("/events", (req, res, next) => {
   const { _end, _order, _sort, _start, q = "" } = req.query;
   //console.log(req.query);
   Event.find({ name: { $regex: `^${q}` } })
-    .populate("users")
+    .populate("customers")
     .populate("products")
     /*  .count({}, function (err, count) {
       collectionLength = count;

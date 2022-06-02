@@ -19,7 +19,7 @@ const eventSchema = new Schema(
       required: true,
     },
     description: String,
-    users: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    customers: [{ type: Schema.Types.ObjectId, ref: "User" }],
     staff: [{ type: Schema.Types.ObjectId, ref: "User" }],
     admins: [{ type: Schema.Types.ObjectId, ref: "User" }],
     products: [{ type: Schema.Types.ObjectId, ref: "Product" }],

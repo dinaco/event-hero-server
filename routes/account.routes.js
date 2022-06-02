@@ -5,11 +5,11 @@ const Product = require("../models/Product.model");
 const Order = require("../models/Order.model");
 
 router.get("/my-account", (req, res, next) => {
-  console.log(req.headers);
-  User.findById("6293229af57db3a3a43646d4")
+  const { _id } = req.payload;
+  User.findById(_id)
     .populate({
       path: "events",
-      options: { date: { $gte: new Date() }, sort: { date: 1 } },
+      //   options: { date: { $gte: new Date() }, sort: { date: 1 } },
     })
     .then((data) => {
       res.json(data);
@@ -42,11 +42,8 @@ router.get("/order/status/:orderId", (req, res, next) => {
 
 router.post("/order/status/:orderId", (req, res, next) => {
   const { orderId } = req.params;
-  User.findByIdAndUpdate(
-    "6293229af57db3a3a43646d4",
-    { balance: 450 },
-    { new: true }
-  )
+  const { _id } = req.payload;
+  User.findByIdAndUpdate(_id, { balance: 450 }, { new: true })
     .then((user) => {
       console.log(user);
       Order.findByIdAndUpdate(
