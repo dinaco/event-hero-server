@@ -18,9 +18,18 @@ router.get("/events", (req, res, next) => {
 
 router.get("/products/:eventId", isAuthenticated, (req, res, next) => {
   const { eventId } = req.params;
-  Event.findById(eventId)
-    .populate("products")
+  const { _id } = req.payload;
+  console.log(req.payload);
+  User.findById(_id)
+    .populate({
+      path: "events",
+      match: { _id: eventId },
+      populate: {
+        path: "products",
+      },
+    })
     .then((products) => {
+      console.log(products);
       res.json(products);
     })
     .catch((err) => next(err));
@@ -33,7 +42,14 @@ router.get("/event/:eventId", (req, res, next) => {
   const { eventId } = req.params;
   Event.findById(eventId)
     .populate("customers")
-    .then((event) => res.json(event))
+    .then((event) => {
+      if (!event.active) {
+        return res
+          .status(400)
+          .json({ errorMessage: "Event blocked! Contact Admin" });
+      }
+      res.json(event);
+    })
     .catch((err) => next(err));
 });
 

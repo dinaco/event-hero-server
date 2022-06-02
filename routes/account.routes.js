@@ -70,8 +70,6 @@ router.post("/order/status/:orderId", (req, res, next) => {
 });
 
 router.post("/order/:eventId", (req, res, next) => {
-  // TODO: add function to check Users balance before placing an order
-
   const { eventId } = req.params;
   let orderInfo = null;
   const { _id } = req.payload;
@@ -97,20 +95,30 @@ router.post("/order/:eventId", (req, res, next) => {
       });
     }
   });
-  console.log(total);
-  /*   if (balance < total) {
-    return res.status(400).json({
-      errorMessage: "Insuficient balance. Please add balance to your account",
-    });
-  } */
 
-  return Order.create({
-    total,
-    bgColor,
-    products: newArr,
-    event: eventId,
-    user: _id,
-  })
+  if (total <= 0) {
+    return res.status(400).json({
+      errorMessage: "There is an error with your order. Order total under 0",
+    });
+  }
+  User.findById(_id)
+    .then((user) => {
+      if (user.balance < total) {
+        return res.status(400).json({
+          errorMessage:
+            "Insuficient balance. Please add balance to your account",
+        });
+      }
+    })
+    .then((e) => {
+      return Order.create({
+        total,
+        bgColor,
+        products: newArr,
+        event: eventId,
+        user: _id,
+      });
+    })
     .then((order) => {
       orderInfo = order;
       return User.findByIdAndUpdate(_id, { $push: { orders: orderInfo._id } });
