@@ -4,13 +4,26 @@ const Event = require("../models/Event.model");
 const Product = require("../models/Product.model");
 const Order = require("../models/Order.model");
 
-router.get("/my-account", (req, res, next) => {
+router.get("/my-events", (req, res, next) => {
   const { _id } = req.payload;
   User.findById(_id)
     .populate({
       path: "events",
       //   options: { date: { $gte: new Date() }, sort: { date: 1 } },
     })
+    .then((data) => {
+      res.json(data);
+    })
+    .catch((err) => next(err));
+  /*   User.findByIdAndUpdate("6293229af57db3a3a43646d4", {
+    $push: { events: "6293229e787fd6a0146f3b02" },
+  }); */
+});
+
+router.put("/add-balance", (req, res, next) => {
+  const { _id } = req.payload;
+  const { amount } = req.body;
+  User.findByIdAndUpdate(_id, { $inc: { balance: amount } })
     .then((data) => {
       res.json(data);
     })
