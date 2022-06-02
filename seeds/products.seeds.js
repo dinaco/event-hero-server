@@ -23,7 +23,7 @@ const randomEvents = async () => {
       name: "Heineken 350ml",
       manufacturer: "Heineken",
       price: 10,
-      event: "6293229e787fd6a0146f3b00",
+      event: "629897cf579b4dc3ac63d5ab",
     },
     {
       name: "Big Mac",
@@ -31,7 +31,7 @@ const randomEvents = async () => {
       price: 5,
       productImg:
         "https://image.similarpng.com/very-thumbnail/2020/04/burger-transparent-png.png",
-      event: "6293229e787fd6a0146f3b00",
+      event: "629897cf579b4dc3ac63d5ab",
     },
     {
       name: "T-shirt Rock",
@@ -39,7 +39,7 @@ const randomEvents = async () => {
       price: 2.55,
       productImg:
         "https://w7.pngwing.com/pngs/712/583/png-transparent-poster-t-shirt-rock-music-punk-rock-rock-posters.png",
-      event: "6293229e787fd6a0146f3b00",
+      event: "629897cf579b4dc3ac63d5ab",
     },
     {
       name: "Heineken 1Liter",
@@ -85,7 +85,7 @@ const randomEvents = async () => {
   try {
     const createdProducts = await Product.create(products);
     await Promise.all(
-      products.map(async (product) => {
+      createdProducts.map(async (product) => {
         try {
           await Event.findByIdAndUpdate(
             { _id: product.event },

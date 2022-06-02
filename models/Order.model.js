@@ -9,9 +9,10 @@ const orderSchema = new Schema(
       require: true,
     },
     bgColor: String,
-    status: { type: Number, default: 10, min: 0 },
+    status: { type: String, default: "pending" },
     products: [
       {
+        _id: { type: Schema.Types.ObjectId, ref: "Product" },
         name: String,
         price: Number,
         quantity: Number,

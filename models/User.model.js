@@ -24,6 +24,7 @@ const userSchema = new Schema(
     },
     balance: { type: Number, min: 0, default: 0 },
     events: [{ type: Schema.Types.ObjectId, ref: "Event" }],
+    orders: [{ type: Schema.Types.ObjectId, ref: "Order" }],
     role: {
       type: String,
       enum: ["customer", "app-admin", "event-admin", "event-staff"],

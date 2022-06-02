@@ -19,6 +19,7 @@ const productSchema = new Schema(
     price: { type: Number, min: 0, required: true },
     event: { type: Schema.Types.ObjectId, ref: "Event" },
     active: { type: Boolean, required: true, default: true },
+    orders: [{ type: Schema.Types.ObjectId, ref: "Order" }],
   },
   {
     // this second object adds extra properties: `createdAt` and `updatedAt`

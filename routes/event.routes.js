@@ -2,6 +2,8 @@ const router = require("express").Router();
 const Event = require("../models/Event.model");
 const User = require("../models/User.model");
 
+const { isAuthenticated } = require("../middleware/jwt.middleware");
+
 router.get("/events", (req, res, next) => {
   let newDate = new Date();
   newDate.setDate(newDate.getDate() - 1);
@@ -14,6 +16,19 @@ router.get("/events", (req, res, next) => {
     .catch((err) => next(err));
 });
 
+router.get("/products/:eventId", isAuthenticated, (req, res, next) => {
+  const { eventId } = req.params;
+  Event.findById(eventId)
+    .populate("products")
+    .then((products) => {
+      res.json(products);
+    })
+    .catch((err) => next(err));
+  /*   User.findByIdAndUpdate("6293229af57db3a3a43646d4", {
+          $push: { events: "6293229e787fd6a0146f3b02" },
+        }); */
+});
+
 router.get("/event/:eventId", (req, res, next) => {
   const { eventId } = req.params;
   Event.findById(eventId)
@@ -22,7 +37,7 @@ router.get("/event/:eventId", (req, res, next) => {
     .catch((err) => next(err));
 });
 
-router.put("/event/:eventId", (req, res, next) => {
+router.put("/event/:eventId", isAuthenticated, (req, res, next) => {
   const { attending, userId } = req.body;
   const { eventId } = req.params;
   console.log(req.body, eventId);
@@ -58,8 +73,7 @@ router.put("/event/:eventId", (req, res, next) => {
       .catch((err) => next(err));
   }
 
-  router.get("/today-events", (req, res, next) => {
-    console.log("here");
+  /*   router.get("/today-events", (req, res, next) => {
     let newDate = new Date();
     newDate.setDate(newDate.getDate() - 1);
     const { _id } = req.payload;
@@ -72,7 +86,7 @@ router.put("/event/:eventId", (req, res, next) => {
         res.json(data);
       })
       .catch((err) => next(err));
-  });
+  }); */
 
   //Event.remove({ _id: { $in: doc.eventsAttended } });
   /*  Event.findById(eventId)

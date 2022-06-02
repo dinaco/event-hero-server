@@ -23,6 +23,7 @@ const eventSchema = new Schema(
     staff: [{ type: Schema.Types.ObjectId, ref: "User" }],
     admins: [{ type: Schema.Types.ObjectId, ref: "User" }],
     products: [{ type: Schema.Types.ObjectId, ref: "Product" }],
+    orders: [{ type: Schema.Types.ObjectId, ref: "Order" }],
     active: { type: Boolean, required: true, default: true },
   },
   {

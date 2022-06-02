@@ -34,7 +34,6 @@ router.put("/add-balance", (req, res, next) => {
 });
 
 router.get("/order/:eventId", (req, res, next) => {
-  // TODO: add function to check Users balance before placing an order
   const { eventId } = req.params;
   Event.findById(eventId)
     .then((event) => {
@@ -56,15 +55,14 @@ router.get("/order/status/:orderId", (req, res, next) => {
 router.post("/order/status/:orderId", (req, res, next) => {
   const { orderId } = req.params;
   const { _id } = req.payload;
-  User.findByIdAndUpdate(_id, { balance: 450 }, { new: true })
+  const { amount } = req.body;
+  User.findByIdAndUpdate(_id, { $inc: { balance: amount * -1 } }, { new: true })
     .then((user) => {
-      console.log(user);
       Order.findByIdAndUpdate(
         orderId,
-        { $set: { status: 20 } },
+        { $set: { status: "completed" } },
         { upsert: true, new: true }
       ).then((order) => {
-        console.log(order);
         res.json(user);
       });
     })
@@ -72,7 +70,12 @@ router.post("/order/status/:orderId", (req, res, next) => {
 });
 
 router.post("/order/:eventId", (req, res, next) => {
+  // TODO: add function to check Users balance before placing an order
+
   const { eventId } = req.params;
+  let orderInfo = null;
+  const { _id } = req.payload;
+
   const newArr = [];
   const ids = [];
   const letters = "0123456789ABCDEF";
@@ -94,22 +97,33 @@ router.post("/order/:eventId", (req, res, next) => {
       });
     }
   });
-  Order.create({ total, bgColor, products: newArr, event: eventId })
-    .then((order) => {
-      res.json(order);
-    })
-    .catch((err) => next(err));
-});
+  console.log(total);
+  /*   if (balance < total) {
+    return res.status(400).json({
+      errorMessage: "Insuficient balance. Please add balance to your account",
+    });
+  } */
 
-router.get("/products", (req, res, next) => {
-  Product.find()
-    .then((products) => {
-      res.json(products);
+  return Order.create({
+    total,
+    bgColor,
+    products: newArr,
+    event: eventId,
+    user: _id,
+  })
+    .then((order) => {
+      orderInfo = order;
+      return User.findByIdAndUpdate(_id, { $push: { orders: orderInfo._id } });
+    })
+    .then(() => {
+      return Event.findByIdAndUpdate(eventId, {
+        $push: { orders: orderInfo._id },
+      });
+    })
+    .then(() => {
+      res.json(orderInfo);
     })
     .catch((err) => next(err));
-  /*   User.findByIdAndUpdate("6293229af57db3a3a43646d4", {
-        $push: { events: "6293229e787fd6a0146f3b02" },
-      }); */
 });
 
 /* router.get("/events/:id", (req, res, next) => {
