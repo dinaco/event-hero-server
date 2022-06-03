@@ -120,6 +120,9 @@ router.put("/order/charge/:orderId", (req, res, next) => {
         { new: true }
       );
     })
+    .then((customer) => {
+      res.json(customer);
+    })
     .catch((err) => next(err));
 });
 
