@@ -19,7 +19,8 @@ const orderSchema = new Schema(
       },
     ],
     event: { type: Schema.Types.ObjectId, ref: "Event" },
-    user: { type: Schema.Types.ObjectId, ref: "User" },
+    customer: { type: Schema.Types.ObjectId, ref: "User" },
+    staff: { type: Schema.Types.ObjectId, ref: "User" },
   },
   {
     // this second object adds extra properties: `createdAt` and `updatedAt`

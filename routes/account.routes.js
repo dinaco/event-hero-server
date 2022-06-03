@@ -42,31 +42,125 @@ router.get("/order/:eventId", (req, res, next) => {
     .catch((err) => next(err));
 });
 
+router.get("/orders/:eventId", (req, res, next) => {
+  const { eventId } = req.params;
+  const { _id } = req.payload;
+  User.findById(_id)
+    .populate({
+      path: "events",
+      match: { _id: eventId },
+    })
+    .populate({
+      path: "orders",
+      match: { event: eventId },
+    })
+    .then((event) => {
+      res.json(event);
+    })
+    .catch((err) => next(err));
+});
+
 router.get("/order/status/:orderId", (req, res, next) => {
   const { orderId } = req.params;
+  const { _id } = req.payload;
   Order.findById(orderId)
     .populate("event")
+    .populate("staff")
+    .populate("customer")
     .then((order) => {
       res.json(order);
     })
     .catch((err) => next(err));
 });
 
-router.post("/order/status/:orderId", (req, res, next) => {
+router.put("/order/process/:orderId", (req, res, next) => {
   const { orderId } = req.params;
   const { _id } = req.payload;
-  const { amount } = req.body;
-  User.findByIdAndUpdate(_id, { $inc: { balance: amount * -1 } }, { new: true })
-    .then((user) => {
-      Order.findByIdAndUpdate(
-        orderId,
-        { $set: { status: "completed" } },
-        { upsert: true, new: true }
-      ).then((order) => {
-        res.json(user);
-      });
+  return (
+    Order.findByIdAndUpdate(
+      orderId,
+      { $set: { status: "processing", staff: _id } },
+      { upsert: true, new: true }
+    )
+      /*     .then((order) => {
+      return User.findByIdAndUpdate(
+        order.customer,
+        { $inc: { balance: (order.total / 2) * -1 } },
+        { new: true }
+      );
+    }) */
+      .then(() => {
+        return User.findByIdAndUpdate(
+          _id,
+          { $push: { orders: orderId } },
+          { new: true }
+        ).then((staff) => {
+          res.json(staff);
+        });
+      })
+      .then((customer) => {
+        res.json(customer);
+      })
+      .catch((err) => next(err))
+  );
+});
+
+router.put("/order/charge/:orderId", (req, res, next) => {
+  const { orderId } = req.params;
+  const { _id } = req.payload;
+  return Order.findByIdAndUpdate(
+    orderId,
+    { $set: { status: "completed" } },
+    { upsert: true, new: true }
+  )
+    .then((order) => {
+      return User.findByIdAndUpdate(
+        order.customer,
+        { $inc: { balance: order.total * -1 } },
+        { new: true }
+      );
     })
     .catch((err) => next(err));
+});
+
+router.delete("/order/delete/:orderId", async (req, res, next) => {
+  const { orderId } = req.params;
+  const { _id } = req.payload;
+  try {
+    let orderToDelete = await Order.findById(orderId);
+    if (orderToDelete.status === "completed") {
+      return res.status(400).json({
+        errorMessage: "This order is completed and can't be deleted",
+      });
+    } else {
+      await User.findByIdAndUpdate(
+        orderToDelete.customer,
+        { $pull: { orders: orderId } },
+        { new: true }
+      );
+      if (orderToDelete.staff) {
+        await User.findByIdAndUpdate(
+          orderToDelete.staff,
+          { $pull: { orders: orderId } },
+          { new: true }
+        );
+      }
+
+      await Event.findByIdAndUpdate(
+        orderToDelete.event,
+        { $pull: { orders: orderId } },
+        { new: true }
+      );
+
+      let orderToRemove = await Order.findByIdAndRemove(orderId).then(
+        (order) => {
+          res.json(order);
+        }
+      );
+    }
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.post("/order/:eventId", (req, res, next) => {
@@ -102,8 +196,8 @@ router.post("/order/:eventId", (req, res, next) => {
     });
   }
   User.findById(_id)
-    .then((user) => {
-      if (user.balance < total) {
+    .then((customer) => {
+      if (customer.balance < total) {
         return res.status(400).json({
           errorMessage:
             "Insuficient balance. Please add balance to your account",
@@ -116,7 +210,7 @@ router.post("/order/:eventId", (req, res, next) => {
         bgColor,
         products: newArr,
         event: eventId,
-        user: _id,
+        customer: _id,
       });
     })
     .then((order) => {
