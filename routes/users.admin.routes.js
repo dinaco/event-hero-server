@@ -1,6 +1,5 @@
 const router = require("express").Router();
 const User = require("../models/User.model");
-const Event = require("../models/Event.model");
 
 router.get("/users", (req, res, next) => {
   // let collectionLength = 0;

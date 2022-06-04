@@ -1,6 +1,4 @@
 const router = require("express").Router();
-const User = require("../models/User.model");
-const Event = require("../models/Event.model");
 const Product = require("../models/Product.model");
 
 router.get("/products", (req, res, next) => {
@@ -38,7 +36,6 @@ router.get("/products/:id", (req, res, next) => {
 });
 router.put("/products/:id", (req, res, next) => {
   const { id } = req.params;
-  console.log("This is re.bodyyyyyyyyyyyyyyyyyyy", req.body);
   Product.findById(id)
     .then((event) => res.json(event))
     .catch((err) => next(err));
