@@ -5,7 +5,7 @@ router.get("/users", (req, res, next) => {
   // let collectionLength = 0;
   const { _end, _order, _sort, _start, q = "" } = req.query;
   // console.log(req.query);
-  User.find({ name: { $regex: "^" + q } })
+  User.find({ name: { $regex: new RegExp("^" + q, "i") } })
     .populate("events")
     /*  .count({}, function (err, count) {
       collectionLength = count;

@@ -6,12 +6,17 @@ const { isAuthenticated } = require("../middleware/jwt.middleware");
 
 router.get("/events", (req, res, next) => {
   let newDate = new Date();
+  const { q = "" } = req.query;
   newDate.setDate(newDate.getDate() - 1);
 
-  Event.find({ date: { $gte: newDate } })
+  Event.find({
+    name: { $regex: new RegExp(q, "i") },
+    date: { $gte: newDate },
+  })
+    .populate("customers")
     .sort({ date: 1 })
-    .then((data) => {
-      res.json(data);
+    .then((events) => {
+      res.json(events);
     })
     .catch((err) => next(err));
 });

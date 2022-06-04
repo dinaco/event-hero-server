@@ -13,10 +13,15 @@ const eventSchema = new Schema(
       type: String,
       default: `https://rollingstone.uol.com.br/media/uploads/rock-in-rio_getty_images_raphael_dias.jpg`,
     },
-    type: {
-      type: String,
-      enum: ["normal", "open-bar"],
-      required: true,
+    location: {
+      address: String,
+      city: String,
+      state: String,
+      country: String,
+      geo: {
+        lat: Number,
+        lng: Number,
+      },
     },
     description: String,
     customers: [{ type: Schema.Types.ObjectId, ref: "User" }],

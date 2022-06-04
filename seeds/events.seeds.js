@@ -22,21 +22,48 @@ const randomEvents = async () => {
     {
       name: "Rock in Rio",
       date: new Date("2022-06-02T03:24:00"),
-      type: "normal",
+      location: {
+        address: "R. Nova do Carvalho,73",
+        city: "Lisboa",
+        state: "Ls",
+        country: "Portugal",
+        geo: {
+          lat: 38.70759862989832,
+          lng: -9.144320244579871,
+        },
+      },
       description:
         "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Architecto voluptate facere dignissimos fugit minus hic, suscipit consequuntur eius totam ipsa quisquam unde ratione ex pariatur recusandae similique iure fugiat fuga?",
     },
     {
       name: "Comiccon",
       date: new Date("2022-10-T03:24:00"),
-      type: "normal",
+      location: {
+        address: "R. Cavaleiro de Oliveira, 28",
+        city: "Lisboa",
+        state: "Ls",
+        country: "Portugal",
+        geo: {
+          lat: 38.73258873496412,
+          lng: -9.132665015742898,
+        },
+      },
       description:
         "Lorem ipsum dolor sit amet consectetur adipisicing elit. Id voluptates perferendis maiores delectus totam cumque, dolor voluptatem, debitis aspernatur iste quasi? Nihil corporis nesciunt, rerum inventore deleniti explicabo excepturi repellendus.",
     },
     {
       name: "Medieval Festival",
       date: new Date("2022-02-17T03:24:00"),
-      type: "open-bar",
+      location: {
+        address: "R. Clodomiro Amazonas, 202",
+        city: "Sao Paulo",
+        state: "SP",
+        country: "Brazil",
+        geo: {
+          lat: -23.585861070776915,
+          lng: -46.67968237381178,
+        },
+      },
       description:
         "Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas ex dolore dolorum quam porro illum laboriosam voluptate debitis praesentium voluptates doloremque unde facilis quod, distinctio officiis nemo culpa quisquam maxime.",
     },
