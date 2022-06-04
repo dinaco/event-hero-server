@@ -25,10 +25,10 @@ router.get("/products/:eventId", isAuthenticated, (req, res, next) => {
       match: { _id: eventId },
       populate: {
         path: "products",
+        match: { active: true },
       },
     })
     .then((products) => {
-      console.log(products);
       res.json(products);
     })
     .catch((err) => next(err));

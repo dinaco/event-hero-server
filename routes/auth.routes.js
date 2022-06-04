@@ -15,7 +15,7 @@ const saltRounds = 10;
 const User = require("../models/User.model");
 
 router.get("/verify", isAuthenticated, (req, res, next) => {
-  console.log("req.payload", req.payload);
+  // console.log("req.payload", req.payload);
 
   res.status(200).json(req.payload);
 });

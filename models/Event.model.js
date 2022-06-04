@@ -25,6 +25,7 @@ const eventSchema = new Schema(
     products: [{ type: Schema.Types.ObjectId, ref: "Product" }],
     orders: [{ type: Schema.Types.ObjectId, ref: "Order" }],
     active: { type: Boolean, required: true, default: true },
+    takeOrders: { type: Boolean, required: true, default: false },
   },
   {
     // this second object adds extra properties: `createdAt` and `updatedAt`
