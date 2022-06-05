@@ -9,6 +9,9 @@ router.get("/my-events", (req, res, next) => {
     .populate({
       path: "events",
       //   options: { date: { $gte: new Date() }, sort: { date: 1 } },
+      populate: {
+        path: "customers",
+      },
     })
     .then((data) => {
       res.json(data);
