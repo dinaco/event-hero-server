@@ -38,6 +38,11 @@ router.put("/users/:id", (req, res, next) => {
     .then((user) => res.json(user))
     .catch((err) => next(err));
 });
+router.post("/users", (req, res, next) => {
+  User.create(req.body)
+    .then((user) => res.json(user))
+    .catch((err) => next(err));
+});
 router.delete("/users/:id", (req, res, next) => {
   const { id } = req.params;
   User.findByIdAndRemove(id)

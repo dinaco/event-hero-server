@@ -4,9 +4,9 @@ const app = require("./app");
 const PORT = process.env.PORT || 5005;
 
 const express = require("express");
-const appIo = express();
+const app2 = express();
 const http = require("http");
-const server = http.createServer(appIo);
+const server = http.createServer(app2);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
@@ -20,3 +20,7 @@ io.on("connection", (socket) => {
 app.listen(PORT, () => {
   console.log(`Server listening on port http://localhost:${PORT}`);
 });
+
+/* server.listen(3000, () => {
+  console.log(`Server listening on port http://localhost:${3000}`);
+}); */
