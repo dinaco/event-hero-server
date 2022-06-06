@@ -29,6 +29,8 @@ const usersAdminRoutes = require("./routes/users.admin.routes");
 app.use("/api/admin", usersAdminRoutes);
 const eventsAdminRoutes = require("./routes/events.admin.routes");
 app.use("/api/admin", eventsAdminRoutes);
+const eventAdminRoutes = require("./routes/eventAdmin.admin.routes");
+app.use("/api/admin", eventAdminRoutes);
 const productsAdminRoutes = require("./routes/products.admin.routes");
 app.use("/api/admin", productsAdminRoutes);
 

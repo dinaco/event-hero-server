@@ -26,6 +26,7 @@ router.get("/users", (req, res, next) => {
     })
     .catch((err) => next(err));
 });
+
 router.get("/users/:id", (req, res, next) => {
   const { id } = req.params;
   User.findById(id)

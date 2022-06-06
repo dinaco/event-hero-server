@@ -32,7 +32,17 @@ router.get("/products/:id", (req, res, next) => {
     .then((event) => res.json(event))
     .catch((err) => next(err));
 });
+
+router.post("/products", (req, res, next) => {
+  Product.create(req.body)
+    .then((event) => res.json(event))
+    .catch((err) => next(err));
+});
+
 router.put("/products/:id", (req, res, next) => {
+  delete req.body.event;
+  req.body.event = req.body.eventsrole;
+  console.log(req.body);
   const { id } = req.params;
   Product.findByIdAndUpdate(id, req.body)
     .then((event) => res.json(event))
