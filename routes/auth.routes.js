@@ -108,9 +108,8 @@ router.post("/login", (req, res, next) => {
           .json({ errorMessage: "Blocked account! Contact Admin" });
       }
 
-      // add If user is found based on the email, check if the in putted password matches the one saved in the database
+      // If user is found based on the email, check if the in putted password matches the one saved in the database
       bcrypt.compare(password, user.hashedPassword).then((isSamePassword) => {
-        console.log(password);
         if (!isSamePassword) {
           return res.status(400).json({ errorMessage: "Wrong credentials." });
         }
