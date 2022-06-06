@@ -15,6 +15,7 @@ const app = express();
 require("./config")(app);
 
 const { isAuthenticated } = require("./middleware/jwt.middleware");
+const isAdmin = require("./middleware/isAdmin.middleware");
 // 👇 Start handling routes here
 // Contrary to the views version, all routes are controlled from the routes/index.js
 const allRoutes = require("./routes/index.routes");
@@ -26,13 +27,13 @@ app.use("/api", eventRoutes);
 const accountRoutes = require("./routes/account.routes");
 app.use("/api", isAuthenticated, accountRoutes);
 const usersAdminRoutes = require("./routes/users.admin.routes");
-app.use("/api/admin", usersAdminRoutes);
+app.use("/api/admin", isAuthenticated, isAdmin, usersAdminRoutes);
 const eventsAdminRoutes = require("./routes/events.admin.routes");
-app.use("/api/admin", eventsAdminRoutes);
+app.use("/api/admin", isAuthenticated, isAdmin, eventsAdminRoutes);
 const eventAdminRoutes = require("./routes/eventAdmin.admin.routes");
-app.use("/api/admin", eventAdminRoutes);
+app.use("/api/admin", isAuthenticated, isAdmin, eventAdminRoutes);
 const productsAdminRoutes = require("./routes/products.admin.routes");
-app.use("/api/admin", productsAdminRoutes);
+app.use("/api/admin", isAuthenticated, isAdmin, productsAdminRoutes);
 
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes
 require("./error-handling")(app);
