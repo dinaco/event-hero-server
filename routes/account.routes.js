@@ -123,6 +123,17 @@ router.put("/order/charge/:orderId", async (req, res, next) => {
 
   try {
     if (role === "event-staff") {
+      const orderCheckUserBalance = await Order.findById(orderId).populate(
+        "customer"
+      );
+      if (
+        orderCheckUserBalance.customer.balance < orderCheckUserBalance.total
+      ) {
+        return res.status(400).json({
+          errorMessage:
+            "Insuficient balance. Customer needs to add more funds.",
+        });
+      }
       const orderInfo = await Order.findById(orderId).populate("event");
       if (orderInfo.status === "processing" && orderInfo.event.takeOrders) {
         const updateOrder = await Order.findByIdAndUpdate(
