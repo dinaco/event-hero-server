@@ -7,16 +7,22 @@ const saltRounds = 10;
 
 router.get("/events-role", (req, res, next) => {
   const { role, _id } = req.payload;
+  const { _end, _order, _sort, _start, q = "" } = req.query;
   let roleBasedSearch = {};
   if (role !== "app-admin") {
-    roleBasedSearch = { admins: { $in: [_id] } };
+    roleBasedSearch = {
+      admins: { $in: [_id] },
+      name: { $regex: new RegExp("^" + q, "i") },
+    };
   }
   Event.find(roleBasedSearch)
     .populate("customers")
     .populate("products")
+    .sort([[_sort, _order === "DESC" ? -1 : 1]])
     .then((events) => {
+      const slicedEvents = events.slice(_start, _end);
       res.setHeader("X-Total-Count", events.length);
-      res.json(events);
+      res.json(slicedEvents);
     })
     .catch((err) => next(err));
 });
@@ -46,7 +52,9 @@ router.get("/staff", async (req, res, next) => {
     const staff = await User.find({
       name: { $regex: new RegExp("^" + q, "i") },
       $or: [{ role: "event-staff" }, { role: "event-admin" }],
-    }).populate("events");
+    })
+      .populate("events")
+      .sort([[_sort, _order === "DESC" ? -1 : 1]]);
     if (role !== "app-admin") {
       const filterByEventAdmin = await Event.find({ admins: { $in: [_id] } });
       const filteredStaffEventbyAdmin = staff.filter((staff) => {
@@ -56,11 +64,16 @@ router.get("/staff", async (req, res, next) => {
           );
         });
       });
+      const slicedFilteredStaffEventbyAdmin = filteredStaffEventbyAdmin.slice(
+        _start,
+        _end
+      );
       res.setHeader("X-Total-Count", filteredStaffEventbyAdmin.length);
-      res.json(filteredStaffEventbyAdmin);
+      res.json(slicedFilteredStaffEventbyAdmin);
     } else {
+      const slicedStaff = staff.slice(_start, _end);
       res.setHeader("X-Total-Count", staff.length);
-      res.json(staff);
+      res.json(slicedStaff);
     }
   } catch (error) {
     next(error);
@@ -110,6 +123,23 @@ router.put("/staff/:userId", async (req, res, next) => {
       { multi: true }
     );
     res.json(staff);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/staff/:userId", async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const deletedUser = await User.findByIdAndRemove(userId);
+    const clearEvents = await Event.updateMany(
+      {
+        _id: { $in: deletedUser.events },
+      },
+      { $pull: { admins: deletedUser._id, staff: deletedUser._id } },
+      { multi: true }
+    );
+    res.json(deletedUser);
   } catch (error) {
     next(error);
   }
