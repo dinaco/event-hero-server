@@ -1,5 +1,9 @@
 const router = require("express").Router();
 const User = require("../models/User.model");
+const Event = require("../models/Event.model");
+
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
 
 router.get("/users", (req, res, next) => {
   // let collectionLength = 0;
@@ -39,12 +43,34 @@ router.put("/users/:id", (req, res, next) => {
     .then((user) => res.json(user))
     .catch((err) => next(err));
 });
-router.post("/users", (req, res, next) => {
-  User.create(req.body)
-    .then((user) => res.json(user))
-    .catch((err) => next(err));
+router.post("/users", async (req, res, next) => {
+  try {
+    const chosenEvents = req.body.eventsrole.filter(
+      (event) => typeof event === "string"
+    );
+    req.body.events = chosenEvents;
+    const salt = await bcrypt.genSalt(saltRounds);
+    const hashedPassword = await bcrypt.hash(req.body.hashedPassword, salt);
+    req.body.hashedPassword = hashedPassword;
+    const user = await User.create(req.body);
+    let roleEvent;
+    req.body.role === "event-staff"
+      ? (roleEvent = { staff: user._id })
+      : (roleEvent = { admins: user._id });
+    const event = await Event.updateMany(
+      {
+        _id: { $in: req.body.events },
+      },
+      { $push: roleEvent },
+      { multi: true }
+    );
+    res.json(user);
+  } catch (error) {
+    next(error);
+  }
 });
 router.delete("/users/:id", (req, res, next) => {
+  //TODO: Clear all models events, orders...
   const { id } = req.params;
   User.findByIdAndRemove(id)
     .then((user) => res.json(user))
