@@ -3,6 +3,11 @@ const User = require("../models/User.model");
 const Event = require("../models/Event.model");
 const Order = require("../models/Order.model");
 
+const bcrypt = require("bcrypt");
+
+// How many rounds should bcrypt run the salt (default [10 - 12 rounds])
+const saltRounds = 10;
+
 router.get("/my-events", (req, res, next) => {
   const { _id } = req.payload;
   User.findById(_id)
@@ -16,6 +21,60 @@ router.get("/my-events", (req, res, next) => {
     .then((data) => {
       res.json(data);
     })
+    .catch((err) => next(err));
+});
+
+router.get("/profile", (req, res, next) => {
+  const { _id } = req.payload;
+  User.findById(_id)
+    .then((user) => res.json(user))
+    .catch((err) => next(err));
+});
+
+router.put("/profile", async (req, res, next) => {
+  try {
+    const { _id, email: payloadEmail } = req.payload;
+    const { name, email, password } = req.body;
+    if (email !== payloadEmail) {
+      const checkEmail = await User.findOne({ email });
+      if (checkEmail) {
+        return res.status(400).json({ errorMessage: "Email already taken." });
+      }
+    }
+
+    if (!password) {
+      const updateUser = await User.findByIdAndUpdate(_id, {
+        name,
+        email,
+      });
+      res.json(updateUser);
+    } else {
+      if (password.length < 8) {
+        return res.status(400).json({
+          errorMessage: "Your password needs to be at least 8 characters long.",
+        });
+      }
+      const salt = await bcrypt.genSalt(saltRounds);
+      const hashedPassword = await bcrypt.hash(req.body.password, salt);
+      // req.body.hashedPassword = hashedPassword;
+      const updateUser = await User.findByIdAndUpdate(_id, {
+        name,
+        email,
+        hashedPassword,
+      });
+      res.json(updateUser);
+    }
+
+    //console.log(password ? password : "no");
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/profile", (req, res, next) => {
+  const { _id } = req.payload;
+  User.findByIdAndRemove(_id)
+    .then((user) => res.json(user))
     .catch((err) => next(err));
 });
 

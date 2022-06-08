@@ -36,11 +36,49 @@ router.get("/users/:id", (req, res, next) => {
     .then((user) => res.json(user))
     .catch((err) => next(err));
 });
-router.put("/users/:id", (req, res, next) => {
-  const { id } = req.params;
-  User.findByIdAndUpdate(id, req.body)
-    .then((user) => res.json(user))
-    .catch((err) => next(err));
+router.put("/users/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userInfo = await User.findById(id);
+    const { name, email, password, active, balance, role } = req.body;
+    if (email !== userInfo.email) {
+      const checkEmail = await User.findOne({ email });
+      if (checkEmail) {
+        return res.status(400).json({ errorMessage: "Email already taken." });
+      }
+    }
+
+    if (!password) {
+      const updateUser = await User.findByIdAndUpdate(id, {
+        name,
+        email,
+        active,
+        balance,
+        role,
+      });
+      res.json(updateUser);
+    } else {
+      if (password.length < 8) {
+        return res.status(400).json({
+          errorMessage: "Your password needs to be at least 8 characters long.",
+        });
+      }
+      const salt = await bcrypt.genSalt(saltRounds);
+      const hashedPassword = await bcrypt.hash(req.body.password, salt);
+      // req.body.hashedPassword = hashedPassword;
+      const updateUser = await User.findByIdAndUpdate(id, {
+        name,
+        email,
+        hashedPassword,
+        active,
+        balance,
+        role,
+      });
+      res.json(updateUser);
+    }
+  } catch (error) {
+    next(error);
+  }
 });
 router.post("/users", async (req, res, next) => {
   try {

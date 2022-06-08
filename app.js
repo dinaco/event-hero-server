@@ -29,7 +29,7 @@ app.use("/api", isAuthenticated, accountRoutes);
 const usersAdminRoutes = require("./routes/users.admin.routes");
 app.use("/api/admin", isAuthenticated, isAdmin, usersAdminRoutes);
 const dashboardRoutes = require("./routes/dashboard.admin.routes");
-app.use("/api/admin", isAuthenticated, isAdmin, dashboardRoutes);
+app.use("/api/admin/dashboard", isAuthenticated, isAdmin, dashboardRoutes);
 const eventsAdminRoutes = require("./routes/events.admin.routes");
 app.use("/api/admin", isAuthenticated, isAdmin, eventsAdminRoutes);
 const eventAdminRoutes = require("./routes/eventAdmin.admin.routes");
