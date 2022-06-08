@@ -58,6 +58,7 @@ router.get("/orders", (req, res, next) => {
       response.push({ id: 6, allOpenOrders });
       response.push({ id: 7, allOpenOrdersQty });
 
+      res.setHeader("X-Total-Count", 1);
       res.json(response);
     })
     .catch((err) => next(err));

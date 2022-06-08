@@ -1,3 +1,4 @@
+//module.exports = function (io) {
 const router = require("express").Router();
 const User = require("../models/User.model");
 const Event = require("../models/Event.model");
@@ -64,8 +65,6 @@ router.put("/profile", async (req, res, next) => {
       });
       res.json(updateUser);
     }
-
-    //console.log(password ? password : "no");
   } catch (error) {
     next(error);
   }
@@ -123,11 +122,14 @@ router.get("/order/status/:orderId", async (req, res, next) => {
       .populate("event")
       .populate("staff")
       .populate("customer");
-    if (role === "customer" && _id == orderInfo.customer._id) {
-      res.json(orderInfo);
-    }
-    if (role === "event-staff" && _id == orderInfo.staff._id) {
-      res.json(orderInfo);
+    if (orderInfo) {
+      if (role === "customer" && _id == orderInfo.customer._id) {
+        res.json(orderInfo);
+      } else if (role === "event-staff" && _id == orderInfo.staff._id) {
+        res.json(orderInfo);
+      } else {
+        return res.status(400).json({ errorMessage: "Order not found." });
+      }
     } else {
       return res.status(400).json({ errorMessage: "Order not found." });
     }
@@ -144,21 +146,21 @@ router.put("/order/process/:orderId", async (req, res, next) => {
     const eventTakingOrders = await Order.findById(orderId).populate("event");
     if (eventTakingOrders.event.takeOrders) {
       if (role === "event-staff") {
-        const orrderInfo = await Order.findByIdAndUpdate(
+        const orderInfo = await Order.findByIdAndUpdate(
           orderId,
           { $set: { status: "processing", staff: _id } },
           { upsert: true }
         );
-        if (orrderInfo.status === "pending") {
+        if (orderInfo.status === "pending") {
           const staff = await User.findByIdAndUpdate(
             _id,
             { $push: { orders: orderId } },
             { new: true }
           );
-          res.json(staff);
         }
 
-        res.json(orrderInfo);
+        res.json(orderInfo);
+        // io.emit("orderChange", orderInfo);
       } else {
         return res.status(400).json({
           errorMessage:
@@ -207,6 +209,7 @@ router.put("/order/charge/:orderId", async (req, res, next) => {
         );
 
         res.json(updateUser);
+        // io.emit("orderChange", updateUser);
       } else {
         return res.status(400).json({
           errorMessage: `Check if order status is "processing" or contact event admin for further information`,
@@ -253,11 +256,9 @@ router.delete("/order/delete/:orderId", async (req, res, next) => {
           { new: true }
         );
 
-        let orderToRemove = await Order.findByIdAndRemove(orderId).then(
-          (order) => {
-            res.json(order);
-          }
-        );
+        let orderToRemove = await Order.findByIdAndRemove(orderId);
+        res.json(orderToRemove);
+        //  io.emit("orderChange", orderToRemove);
       }
     } catch (error) {
       next(error);
@@ -346,16 +347,17 @@ router.post("/order/:eventId", async (req, res, next) => {
 });
 
 /* router.get("/events/:id", (req, res, next) => {
-  const { id } = req.params;
-  Event.findById(id)
-    .then((event) => res.json(event))
-    .catch((err) => next(err));
-});
-router.delete("/events/:id", (req, res, next) => {
-  const { id } = req.params;
-  Event.findByIdAndRemove(id)
-    .then((event) => res.json(event))
-    .catch((err) => next(err));
-}); */
-
+                        const { id } = req.params;
+                        Event.findById(id)
+                        .then((event) => res.json(event))
+                        .catch((err) => next(err));
+                      });
+                      router.delete("/events/:id", (req, res, next) => {
+                        const { id } = req.params;
+                        Event.findByIdAndRemove(id)
+                        .then((event) => res.json(event))
+                        .catch((err) => next(err));
+                      }); */
 module.exports = router;
+//return router;
+//};

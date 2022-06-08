@@ -11,6 +11,11 @@ const express = require("express");
 
 const app = express();
 
+/* const socketIo = require("socket.io");
+
+let io = socketIo();
+app.io = io; */
+
 // ℹ️ This function is getting exported from the config folder. It runs most pieces of middleware
 require("./config")(app);
 
@@ -24,7 +29,7 @@ const authRoutes = require("./routes/auth.routes");
 app.use("/auth", authRoutes);
 const eventRoutes = require("./routes/event.routes");
 app.use("/api", eventRoutes);
-const accountRoutes = require("./routes/account.routes");
+const accountRoutes = require("./routes/account.routes"); //(io);
 app.use("/api", isAuthenticated, accountRoutes);
 const usersAdminRoutes = require("./routes/users.admin.routes");
 app.use("/api/admin", isAuthenticated, isAdmin, usersAdminRoutes);
