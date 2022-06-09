@@ -43,6 +43,7 @@ router.get("/event/:eventId", (req, res, next) => {
   const { eventId } = req.params;
   Event.findById(eventId)
     .populate("customers")
+    .populate("staff")
     .then((event) => {
       if (!event.active) {
         return res
