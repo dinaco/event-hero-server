@@ -10,7 +10,7 @@ const productSchema = new Schema(
     },
     productImg: {
       type: String,
-      default: `https://www.heineken.com/media-az/01pfxdqq/heineken-original-bottle.png?quality=85`,
+      default: `https://cdn-icons-png.flaticon.com/512/262/262344.png`,
     },
     manufacturer: {
       type: String,

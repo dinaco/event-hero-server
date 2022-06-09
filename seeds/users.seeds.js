@@ -31,15 +31,16 @@ const randomUsers = async () => {
         try {
           const {
             email,
-            name,
+            name: { first, last },
             login: { password },
             picture: { large: profileImg },
           } = user;
 
           const salt = await bcrypt.genSalt(saltRounds);
-          const hashedPassword = await bcrypt.hash(password, salt);
+          const hashedPassword = await bcrypt.hash("12345678", salt);
 
           newUsersArr.push({
+            name: `${first} ${last}`,
             email,
             hashedPassword,
             profileImg,

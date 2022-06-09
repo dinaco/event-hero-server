@@ -1,13 +1,4 @@
-const app = require("./app");
-
-// ℹ️ Sets the PORT for our app to have access to it. If no env has been set, we hard code it to 3000
-const PORT = process.env.PORT || 5005;
-
-app.listen(PORT, () => {
-  console.log(`Server listening on port http://localhost:${PORT}`);
-});
-
-/* const http = require("http");
+const http = require("http");
 let app = require("./app");
 
 (err, req, res) => {
@@ -22,7 +13,8 @@ let app = require("./app");
 
 let server = http.createServer(app);
 
-let io = app.io;
+let io = require("socket.io")(server);
+app.io = io;
 io.attach(server, {
   allowEIO4: true,
   cors: {
@@ -32,19 +24,19 @@ io.attach(server, {
 });
 
 io.on("connection", (socket) => {
-  console.log("a user connected");
+  console.log("a user connected", socket.id);
   socket.on("disconnect", () => {
-    console.log("user disconnected");
+    console.log("user disconnected", socket.id);
   });
 });
 
 // ℹ️ Sets the PORT for our app to have access to it. If no env has been set, we hard code it to 3000
 const PORT = process.env.PORT || 5005;
 
-app.listen(process.env.PORT, () => {
+/* app.listen(process.env.PORT, () => {
+  console.log(`Listening on http://localhost:${process.env.PORT}`);
+}); */
+
+server.listen(PORT, () => {
   console.log(`Listening on http://localhost:${process.env.PORT}`);
 });
-
-server.listen(5006, () => {
-  console.log(`Listening on http://localhost:${5006}`);
-}); */

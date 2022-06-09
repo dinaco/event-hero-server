@@ -1,10 +1,11 @@
-//module.exports = function (io) {
 const router = require("express").Router();
 const User = require("../models/User.model");
 const Event = require("../models/Event.model");
 const Order = require("../models/Order.model");
 
 const bcrypt = require("bcrypt");
+
+//TODO: check if staff is related to the event before performing any CRUD
 
 // How many rounds should bcrypt run the salt (default [10 - 12 rounds])
 const saltRounds = 10;
@@ -77,7 +78,7 @@ router.delete("/profile", (req, res, next) => {
     .catch((err) => next(err));
 });
 
-router.put("/add-balance", (req, res, next) => {
+router.put("/add-funds", (req, res, next) => {
   const { _id } = req.payload;
   const { amount } = req.body;
   User.findByIdAndUpdate(_id, { $inc: { balance: amount } })
@@ -160,7 +161,7 @@ router.put("/order/process/:orderId", async (req, res, next) => {
         }
 
         res.json(orderInfo);
-        // io.emit("orderChange", orderInfo);
+        req.app.io.emit("orderChange", eventTakingOrders);
       } else {
         return res.status(400).json({
           errorMessage:
@@ -209,7 +210,7 @@ router.put("/order/charge/:orderId", async (req, res, next) => {
         );
 
         res.json(updateUser);
-        // io.emit("orderChange", updateUser);
+        req.app.io.emit("orderChange", updateUser);
       } else {
         return res.status(400).json({
           errorMessage: `Check if order status is "processing" or contact event admin for further information`,
@@ -258,7 +259,7 @@ router.delete("/order/delete/:orderId", async (req, res, next) => {
 
         let orderToRemove = await Order.findByIdAndRemove(orderId);
         res.json(orderToRemove);
-        //  io.emit("orderChange", orderToRemove);
+        req.appio.emit("orderChange", orderToRemove);
       }
     } catch (error) {
       next(error);
@@ -358,6 +359,5 @@ router.post("/order/:eventId", async (req, res, next) => {
                         .then((event) => res.json(event))
                         .catch((err) => next(err));
                       }); */
+
 module.exports = router;
-//return router;
-//};
