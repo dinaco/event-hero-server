@@ -20,8 +20,12 @@ mongoose
 const randomEvents = async () => {
   const eventsInfos = [
     {
-      name: "Rock in Rio",
-      date: new Date("2022-06-02T03:24:00"),
+      name: "Lolapalooza",
+      date: new Date("2022-06-09T03:24:00"),
+      active: true,
+      takeOrders: true,
+      splashImg:
+        "https://media.gettyimages.com/photos/festivalgoers-on-day-four-of-lollapalooza-at-grant-park-on-august-1-picture-id1234390428?s=612x612",
       location: {
         address: "R. Nova do Carvalho,73",
         city: "Lisboa",
@@ -36,36 +40,64 @@ const randomEvents = async () => {
         "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Architecto voluptate facere dignissimos fugit minus hic, suscipit consequuntur eius totam ipsa quisquam unde ratione ex pariatur recusandae similique iure fugiat fuga?",
     },
     {
-      name: "Comiccon",
-      date: new Date("2022-10-T03:24:00"),
+      name: "Tomorrowland",
+      date: new Date("2022-06-09T03:24:00"),
+      active: true,
+      takeOrders: true,
+      splashImg:
+        "https://images.prismic.io/tomorrowland/8beeb14b-bc77-4ee6-baca-8317fff8c43a_190720-194141-TML2019-KV-5679-HR.jpg?auto=compress,format&rect=0,0,5266,3511&w=480&h=320",
       location: {
-        address: "R. Cavaleiro de Oliveira, 28",
+        address: "R. Nova do Carvalho,73",
         city: "Lisboa",
         state: "Ls",
         country: "Portugal",
         geo: {
-          lat: 38.73258873496412,
-          lng: -9.132665015742898,
+          lat: 38.70759862989832,
+          lng: -9.144320244579871,
         },
       },
       description:
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Id voluptates perferendis maiores delectus totam cumque, dolor voluptatem, debitis aspernatur iste quasi? Nihil corporis nesciunt, rerum inventore deleniti explicabo excepturi repellendus.",
+        "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Architecto voluptate facere dignissimos fugit minus hic, suscipit consequuntur eius totam ipsa quisquam unde ratione ex pariatur recusandae similique iure fugiat fuga?",
     },
     {
-      name: "Medieval Festival",
-      date: new Date("2022-02-17T03:24:00"),
+      name: "Roland Garros",
+      date: new Date("2022-06-04T03:24:00"),
+      active: true,
+      takeOrders: true,
+      splashImg:
+        "https://padelmagazine.fr/wp-content/uploads/2019/11/roland-garros-2020.jpg",
       location: {
-        address: "R. Clodomiro Amazonas, 202",
-        city: "Sao Paulo",
-        state: "SP",
-        country: "Brazil",
+        address: "R. Nova do Carvalho,73",
+        city: "Lisboa",
+        state: "Ls",
+        country: "Portugal",
         geo: {
-          lat: -23.585861070776915,
-          lng: -46.67968237381178,
+          lat: 38.70759862989832,
+          lng: -9.144320244579871,
+        },
+        description:
+          "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Architecto voluptate facere dignissimos fugit minus hic, suscipit consequuntur eius totam ipsa quisquam unde ratione ex pariatur recusandae similique iure fugiat fuga?",
+      },
+    },
+    {
+      name: "Wimbledon",
+      date: new Date("2022-06-27T03:24:00"),
+      active: true,
+      takeOrders: true,
+      splashImg:
+        "https://www.puntodebreak.com/files/wimbledon-2022-atp-entry-list.jpeg",
+      location: {
+        address: "R. Nova do Carvalho,73",
+        city: "Lisboa",
+        state: "Ls",
+        country: "Portugal",
+        geo: {
+          lat: 38.70759862989832,
+          lng: -9.144320244579871,
         },
       },
       description:
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas ex dolore dolorum quam porro illum laboriosam voluptate debitis praesentium voluptates doloremque unde facilis quod, distinctio officiis nemo culpa quisquam maxime.",
+        "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Architecto voluptate facere dignissimos fugit minus hic, suscipit consequuntur eius totam ipsa quisquam unde ratione ex pariatur recusandae similique iure fugiat fuga?",
     },
   ];
   const userIds = [];
@@ -101,7 +133,7 @@ const randomEvents = async () => {
   } catch (error) {
     console.log(error);
   }
-  console.log(`Created ${createdEvents.length} in the db`);
+  console.log(`Created events in the db`);
   mongoose.disconnect(() => console.log(`db disconnected`));
 };
 

@@ -13,7 +13,8 @@ let app = require("./app");
 
 let server = http.createServer(app);
 
-let io = app.io;
+let io = require("socket.io")(server);
+app.io = io;
 io.attach(server, {
   allowEIO4: true,
   cors: {
@@ -23,7 +24,7 @@ io.attach(server, {
 });
 
 io.on("connection", (socket) => {
-  console.log("a user connected", socket.id);
+  console.log("a user connected", socket);
   socket.on("disconnect", () => {
     console.log("user disconnected", socket.id);
   });
@@ -33,10 +34,10 @@ io.on("connection", (socket) => {
 const PORT = process.env.PORT || 5005;
 const PORT2 = process.env.PORT2 || 5006;
 
-app.listen(process.env.PORT, () => {
+/* app.listen(process.env.PORT, () => {
   console.log(`Listening on http://localhost:${process.env.PORT}`);
-});
+}); */
 
-server.listen(PORT2, () => {
-  console.log(`Listening on http://localhost:${process.env.PORT}`);
+server.listen(PORT, () => {
+  console.log(`Listening on http://localhost:${process.env.PORT2}`);
 });

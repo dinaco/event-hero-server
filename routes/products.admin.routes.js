@@ -2,6 +2,8 @@ const router = require("express").Router();
 const Product = require("../models/Product.model");
 const Event = require("../models/Event.model");
 
+//TODO: Protect routes check active staff / customer /admin
+
 router.get("/products", async (req, res, next) => {
   try {
     const { _id, role } = req.payload;
@@ -56,19 +58,30 @@ router.get("/products/:id", (req, res, next) => {
     .catch((err) => next(err));
 });
 
-router.post("/products", (req, res, next) => {
-  Product.create(req.body)
-    .then((event) => res.json(event))
-    .catch((err) => next(err));
+router.post("/products", async (req, res, next) => {
+  try {
+    req.body.event = req.body.eventsrole;
+    const newProduct = await Product.create(req.body);
+    const pushToEvent = await Event.findByIdAndUpdate(
+      req.body.event,
+      {
+        $push: { products: newProduct._id },
+      },
+      { new: true }
+    );
+    res.json(newProduct);
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.put("/products/:id", async (req, res, next) => {
   try {
-    delete req.body.event;
-    req.body.event = req.body.eventsrole;
+    /*     delete req.body.event;
+    req.body.event = req.body.eventsrole; */
     const { id } = req.params;
     const product = await Product.findByIdAndUpdate(id, req.body);
-    const clearEvent = await Event.findByIdAndUpdate(product.event._id, {
+    /*     const clearEvent = await Event.findByIdAndUpdate(product.event._id, {
       $pull: { products: id },
     });
     const pushToEvent = await Event.findByIdAndUpdate(
@@ -77,7 +90,7 @@ router.put("/products/:id", async (req, res, next) => {
         $push: { products: id },
       },
       { new: true }
-    );
+    ); */
     res.json(product);
   } catch (error) {
     next(error);
