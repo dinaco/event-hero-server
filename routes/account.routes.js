@@ -259,7 +259,7 @@ router.delete("/order/delete/:orderId", async (req, res, next) => {
 
         let orderToRemove = await Order.findByIdAndRemove(orderId);
         res.json(orderToRemove);
-        req.appio.emit("orderChange", orderToRemove);
+        req.app.io.emit("orderChange", orderToRemove);
       }
     } catch (error) {
       next(error);
