@@ -31,11 +31,12 @@ io.on("connection", (socket) => {
 
 // ℹ️ Sets the PORT for our app to have access to it. If no env has been set, we hard code it to 3000
 const PORT = process.env.PORT || 5005;
+const PORT2 = process.env.PORT2 || 5006;
 
 app.listen(process.env.PORT, () => {
   console.log(`Listening on http://localhost:${process.env.PORT}`);
 });
 
-server.listen(5006, () => {
+server.listen(PORT2, () => {
   console.log(`Listening on http://localhost:${process.env.PORT}`);
 });
