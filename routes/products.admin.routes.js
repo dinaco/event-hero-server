@@ -16,11 +16,11 @@ router.get("/products", async (req, res, next) => {
       const eventsRoleIds = eventsRole.map((event) => event._id);
       roleBasedSearch = {
         event: { $in: [...eventsRoleIds] },
-        name: { $regex: new RegExp("^" + q, "i") },
+        name: { $regex: new RegExp(q, "i") },
       };
     } else {
       roleBasedSearch = {
-        name: { $regex: new RegExp("^" + q, "i") },
+        name: { $regex: new RegExp(q, "i") },
       };
     }
     const products = await Product.find(roleBasedSearch)

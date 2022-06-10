@@ -12,7 +12,7 @@ router.get("/events-role", (req, res, next) => {
   if (role !== "app-admin") {
     roleBasedSearch = {
       admins: { $in: [_id] },
-      name: { $regex: new RegExp("^" + q, "i") },
+      name: { $regex: new RegExp(q, "i") },
     };
   }
   Event.find(roleBasedSearch)
@@ -50,7 +50,11 @@ router.get("/staff", async (req, res, next) => {
     const { _end, _order, _sort, _start, q = "" } = req.query;
     const { role, _id } = req.payload;
     const staff = await User.find({
-      name: { $regex: new RegExp("^" + q, "i") },
+      /*       $and: [
+        { name: { $regex: new RegExp("^" + q, "i") } },
+        { role: "event-staff" },
+      ], */
+      name: { $regex: new RegExp(q, "i") },
       $or: [{ role: "event-staff" }, { role: "event-admin" }],
     })
       .populate("events")
