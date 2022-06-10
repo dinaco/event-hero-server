@@ -1,14 +1,10 @@
-# EVENT HERO (CLIENT)
+## Live Demo
 
-<br>
-
-# Quick Compo
-
-<br>
+[Deployed App Link](https://iron-event-hero.netlify.app)
 
 ## Description
 
-Thisis an wallet app to be used in events like concerts, shows, festivals, ... In the app, you can put balance in your wallet and spend it on any event that you are attending to.
+Wallet app to be used in events like concerts, shows, festivals, pretty much any kind of events. In the app, you can add funds in your wallet and spend it on any event that you are attending to.
 
 ## User Stories
 
@@ -26,9 +22,7 @@ Thisis an wallet app to be used in events like concerts, shows, festivals, ... I
 
 ## Backlog
 
-- Implement socket.io, update order screen on scan
-- fake credit card package
-- tweak admin pages
+- Implement KPI's / charts dashboard admin area
 
 <br>
 
@@ -88,22 +82,28 @@ Components:
     email: {
       type: String,
       unique: true,
-      require: true,
-      lowercase: true,
-      // unique: true -> Ideally, should be unique, but its up to you
+      required: true,
+    },
+    name: {
+      type: String,
+      required: true,
     },
     hashedPassword: { type: String, required: true },
     profileImg: {
       type: String,
+      default: `https://randomuser.me/api/portraits/${randomGender}/${Math.floor(
+        Math.random() * 50 + 1
+      )}.jpg`,
     },
     balance: { type: Number, min: 0, default: 0 },
     events: [{ type: Schema.Types.ObjectId, ref: "Event" }],
-    type: {
+    orders: [{ type: Schema.Types.ObjectId, ref: "Order" }],
+    role: {
       type: String,
-      enum: ["user", "app-admin", "event-admin", "event-staff"],
-      required: true,
+      enum: ["customer", "app-admin", "event-admin", "event-staff"],
+      default: "customer",
     },
-    active: { type: Boolean, required: true, default: true },
+    active: { type: Boolean, default: true },
   }
 ```
 
@@ -118,16 +118,26 @@ Components:
     date: { type: Date, require: true },
     splashImg: {
       type: String,
+      default: `https://rollingstone.uol.com.br/media/uploads/rock-in-rio_getty_images_raphael_dias.jpg`,
     },
-    type: {
-      type: String,
-      enum: ["normal", "open-bar"],
-      required: true,
+    location: {
+      address: String,
+      city: String,
+      state: String,
+      country: String,
+      geo: {
+        lat: Number,
+        lng: Number,
+      },
     },
-    users: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    description: String,
+    customers: [{ type: Schema.Types.ObjectId, ref: "User" }],
     staff: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    admins: [{ type: Schema.Types.ObjectId, ref: "User" }],
     products: [{ type: Schema.Types.ObjectId, ref: "Product" }],
+    orders: [{ type: Schema.Types.ObjectId, ref: "Order" }],
     active: { type: Boolean, required: true, default: true },
+    takeOrders: { type: Boolean, required: true, default: false },
   }
 ```
 
@@ -139,17 +149,18 @@ Components:
       type: String,
       require: true,
     },
-    date: { type: Date, require: true },
     productImg: {
-      type: String
+      type: String,
+      default: `https://cdn-icons-png.flaticon.com/512/262/262344.png`,
     },
     manufacturer: {
       type: String,
       require: true,
     },
     price: { type: Number, min: 0, required: true },
-    events: [{ type: Schema.Types.ObjectId, ref: "Event" }],
+    event: { type: Schema.Types.ObjectId, ref: "Event" },
     active: { type: Boolean, required: true, default: true },
+    orders: [{ type: Schema.Types.ObjectId, ref: "Order" }],
   }
 ```
 
@@ -162,16 +173,18 @@ Components:
       require: true,
     },
     bgColor: String,
-    status: { type: Number, default: 10, min: 0 },
+    status: { type: String, default: "pending" },
     products: [
       {
+        _id: { type: Schema.Types.ObjectId, ref: "Product" },
         name: String,
         price: Number,
         quantity: Number,
       },
     ],
     event: { type: Schema.Types.ObjectId, ref: "Event" },
-    user: { type: Schema.Types.ObjectId, ref: "User" },
+    customer: { type: Schema.Types.ObjectId, ref: "User" },
+    staff: { type: Schema.Types.ObjectId, ref: "User" },
   }
 ```
 
@@ -196,27 +209,27 @@ Components:
 
 <br>
 
-## API's
-
-<br>
-
 ## Packages
 
 [React-admin](https://marmelab.com/react-admin/)
-[QRCode](https://www.npmjs.com/package/react-qr-code)
-[MomentJS](https://momentjs.com/)
-[MaterialUI](https://mui.com/)
-[SocketIo](https://socket.io/)
-
 <br>
+[QRCode](https://www.npmjs.com/package/react-qr-code)
+<br>
+[MomentJS](https://momentjs.com/)
+<br>
+[MaterialUI](https://mui.com/)
+<br>
+[Styled Components](https://styled-components.com/)
+<br>
+[Toastify](https://www.npmjs.com/package/react-toastify)
+<br>
+[SocketIo](https://socket.io/)
 
 ### Git
 
 [Client repository Link](https://github.com/dinaco/event-hero-client)
 
 [Server repository Link](https://github.com/dinaco/event-hero-server)
-
-[Deployed App Link](http://heroku.com)
 
 ### Developer
 
