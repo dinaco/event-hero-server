@@ -6,23 +6,16 @@ const Event = require("../models/Event.model");
 
 router.get("/", async (req, res, next) => {
   try {
-    const { _id, role } = req.payload;
+    const { _id } = req.payload;
     const { _end, _order, _sort, _start, q = "" } = req.query;
-    let roleBasedSearch = {};
-    if (role !== "app-admin") {
-      const eventsRole = await Event.find({
-        admins: { $in: [_id] },
-      });
-      const eventsRoleIds = eventsRole.map((event) => event._id);
-      roleBasedSearch = {
-        event: { $in: [...eventsRoleIds] },
-        name: { $regex: new RegExp(q, "i") },
-      };
-    } else {
-      roleBasedSearch = {
-        name: { $regex: new RegExp(q, "i") },
-      };
-    }
+    const eventsRole = await Event.find({
+      admins: { $in: [_id] },
+    });
+    const eventsRoleIds = eventsRole.map((event) => event._id);
+    const roleBasedSearch = {
+      event: { $in: [...eventsRoleIds] },
+      name: { $regex: new RegExp(q, "i") },
+    };
     const products = await Product.find(roleBasedSearch)
       .populate("event")
       .sort([[_sort, _order === "DESC" ? -1 : 1]]);

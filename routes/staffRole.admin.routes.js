@@ -41,69 +41,41 @@ router.get("/", async (req, res, next) => {
 router.get("/:userId", async (req, res, next) => {
   try {
     const { userId } = req.params;
-    const staff = await User.findById(userId).populate("events");
-    res.json(staff);
-  } catch (err) {
-    next(err);
-  }
-});
+    const { _id } = req.payload;
+    const checkUser = await User.findById(userId).populate("events");
 
-router.put("/:userId", async (req, res, next) => {
-  try {
-    const { userId } = req.params;
+    //If one event-admin cant change the infos of the other, change condition bellow to remove event-admin
+    // if you change that you need to find a way to let the event-admin change it's own information at least
 
-    const clearUserInfo = await User.findByIdAndUpdate(userId, {
-      $set: { events: [] },
-    });
-    const chosenEvents = req.body.eventsrole.filter(
-      (event) => typeof event === "string"
-    );
-    req.body.events = chosenEvents;
-    let roleEvent;
-    req.body.role === "event-staff"
-      ? (roleEvent = { staff: clearUserInfo._id })
-      : (roleEvent = { admins: clearUserInfo._id });
-    const staff = await User.findByIdAndUpdate(userId, req.body, {
-      $push: { events: chosenEvents },
-    });
-    const clearEvents = await Event.updateMany(
-      {
-        _id: { $in: clearUserInfo.events },
-      },
-      { $pull: { admins: clearUserInfo._id, staff: clearUserInfo._id } },
-      { multi: true }
-    );
-    const event = await Event.updateMany(
-      {
-        _id: { $in: req.body.events },
-      },
-      { $push: roleEvent },
-      { multi: true }
-    );
-    res.json(staff);
-  } catch (err) {
-    next(err);
-  }
-});
+    if (checkUser.role !== "event-admin" && checkUser.role !== "event-staff") {
+      return res.status(400).json({
+        errMessage: "You do not have permission for this action.",
+      });
+    } else {
+      const admin = await User.findById(_id).populate("events");
+      const filterEventsUser = checkUser.events.map((event) =>
+        event._id.toString()
+      );
+      const filterEventsAdmin = admin.events.map((event) =>
+        event._id.toString()
+      );
 
-router.delete("/:userId", async (req, res, next) => {
-  try {
-    const { userId } = req.params;
-    const deletedUser = await User.findByIdAndRemove(userId);
-    const clearEvents = await Event.updateMany(
-      {
-        _id: { $in: deletedUser.events },
-      },
-      { $pull: { admins: deletedUser._id, staff: deletedUser._id } },
-      { multi: true }
-    );
-    res.json(deletedUser);
+      if (filterEventsAdmin.some((event) => filterEventsUser.includes(event))) {
+        res.json(checkUser);
+      } else {
+        return res.status(400).json({
+          errMessage: "You do not have permission for this action.",
+        });
+      }
+    }
   } catch (err) {
     next(err);
   }
 });
 
 router.post("/", async (req, res, next) => {
+  //TODO: check if event "belongs to this user"
+
   try {
     if (req.body.role !== "app-admin") {
       const chosenEvents = req.body.eventsrole.filter(
@@ -130,6 +102,112 @@ router.post("/", async (req, res, next) => {
       return res.status(400).json({
         errMessage: "You do not have permission to create this type of user.",
       });
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put("/:userId", async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const { _id } = req.payload;
+    const checkUser = await User.findById(userId).populate("events");
+
+    //If one event-admin cant change the infos of the other, change condition bellow to remove event-admin
+    // if you change that you need to find a way to let the event-admin change it's own information at least
+
+    if (checkUser.role !== "event-admin" && checkUser.role !== "event-staff") {
+      return res.status(400).json({
+        errMessage: "You do not have permission for this action.",
+      });
+    } else {
+      const admin = await User.findById(_id).populate("events");
+      const filterEventsUser = checkUser.events.map((event) =>
+        event._id.toString()
+      );
+      const filterEventsAdmin = admin.events.map((event) =>
+        event._id.toString()
+      );
+
+      if (filterEventsAdmin.some((event) => filterEventsUser.includes(event))) {
+        const clearUserInfo = await User.findByIdAndUpdate(userId, {
+          $set: { events: [] },
+        });
+        const chosenEvents = req.body.eventsrole.filter(
+          (event) => typeof event === "string"
+        );
+        req.body.events = chosenEvents;
+        let roleEvent;
+        req.body.role === "event-staff"
+          ? (roleEvent = { staff: clearUserInfo._id })
+          : (roleEvent = { admins: clearUserInfo._id });
+        const staff = await User.findByIdAndUpdate(userId, req.body, {
+          $push: { events: chosenEvents },
+        });
+        const clearEvents = await Event.updateMany(
+          {
+            _id: { $in: clearUserInfo.events },
+          },
+          { $pull: { admins: clearUserInfo._id, staff: clearUserInfo._id } },
+          { multi: true }
+        );
+        const event = await Event.updateMany(
+          {
+            _id: { $in: req.body.events },
+          },
+          { $push: roleEvent },
+          { multi: true }
+        );
+        res.json(staff);
+      } else {
+        return res.status(400).json({
+          errMessage: "You do not have permission for this action.",
+        });
+      }
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete("/:userId", async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const { _id } = req.payload;
+    const checkUser = await User.findById(userId).populate("events");
+
+    //If one event-admin cant change the infos of the other, change condition bellow to remove event-admin
+    // if you change that you need to find a way to let the event-admin change it's own information at least
+
+    if (checkUser.role !== "event-admin" && checkUser.role !== "event-staff") {
+      return res.status(400).json({
+        errMessage: "You do not have permission for this action.",
+      });
+    } else {
+      const admin = await User.findById(_id).populate("events");
+      const filterEventsUser = checkUser.events.map((event) =>
+        event._id.toString()
+      );
+      const filterEventsAdmin = admin.events.map((event) =>
+        event._id.toString()
+      );
+
+      if (filterEventsAdmin.some((event) => filterEventsUser.includes(event))) {
+        const deletedUser = await User.findByIdAndRemove(userId);
+        const clearEvents = await Event.updateMany(
+          {
+            _id: { $in: deletedUser.events },
+          },
+          { $pull: { admins: deletedUser._id, staff: deletedUser._id } },
+          { multi: true }
+        );
+        res.json(deletedUser);
+      } else {
+        return res.status(400).json({
+          errMessage: "You do not have permission for this action.",
+        });
+      }
     }
   } catch (err) {
     next(err);

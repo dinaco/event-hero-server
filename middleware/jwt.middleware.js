@@ -20,5 +20,3 @@ function getTokenFromHeaders(req) {
 }
 
 module.exports = { isAuthenticated };
-
-//"Bearer dfygvbhnjio876543678iouiyghf"
