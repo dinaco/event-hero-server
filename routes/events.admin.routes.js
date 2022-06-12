@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const Event = require("../models/Event.model");
 
-router.get("/events", (req, res, next) => {
+router.get("/", (req, res, next) => {
   // let collectionLength = 0;
   const { _end, _order, _sort, _start, q = "" } = req.query;
   //console.log(req.query);
@@ -32,24 +32,24 @@ router.get("/events", (req, res, next) => {
     .catch((err) => next(err));
 });
 
-router.get("/events/:id", (req, res, next) => {
+router.get("/:id", (req, res, next) => {
   const { id } = req.params;
   Event.findById(id)
     .then((event) => res.json(event))
     .catch((err) => next(err));
 });
-router.post("/events", (req, res, next) => {
+router.post("/", (req, res, next) => {
   Event.create(req.body)
     .then((event) => res.json(event))
     .catch((err) => next(err));
 });
-router.put("/events/:id", (req, res, next) => {
+router.put("/:id", (req, res, next) => {
   const { id } = req.params;
   Event.findByIdAndUpdate(id, req.body)
     .then((event) => res.json(event))
     .catch((err) => next(err));
 });
-router.delete("/events/:id", (req, res, next) => {
+router.delete("/:id", (req, res, next) => {
   //TODO: delete its products, customers, event-staff and all references
   const { id } = req.params;
   Event.findByIdAndRemove(id)

@@ -5,7 +5,7 @@ const Event = require("../models/Event.model");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
-router.get("/users", (req, res, next) => {
+router.get("/", (req, res, next) => {
   // let collectionLength = 0;
   const { _end, _order, _sort, _start, q = "" } = req.query;
   User.find({ name: { $regex: new RegExp(q, "i") } })
@@ -30,7 +30,7 @@ router.get("/users", (req, res, next) => {
     .catch((err) => next(err));
 });
 
-router.get("/users/:id", (req, res, next) => {
+router.get("/:id", (req, res, next) => {
   const { id } = req.params;
   User.findById(id)
     .then((user) => res.json(user))
@@ -81,7 +81,7 @@ router.put("/users/:id", async (req, res, next) => {
     next(error);
   }
 });
-router.post("/users", async (req, res, next) => {
+router.post("/", async (req, res, next) => {
   try {
     const chosenEvents = req.body.eventsrole.filter(
       (event) => typeof event === "string"
@@ -107,7 +107,7 @@ router.post("/users", async (req, res, next) => {
     next(error);
   }
 });
-router.delete("/users/:id", (req, res, next) => {
+router.delete("/:id", (req, res, next) => {
   //TODO: Clear all models events, orders...
   const { id } = req.params;
   User.findByIdAndRemove(id)

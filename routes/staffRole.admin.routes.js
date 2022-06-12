@@ -5,96 +5,50 @@ const Event = require("../models/Event.model");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
-router.get("/events-role", (req, res, next) => {
-  const { role, _id } = req.payload;
-  const { _end, _order, _sort, _start, q = "" } = req.query;
-  let roleBasedSearch = {};
-  if (role !== "app-admin") {
-    roleBasedSearch = {
-      admins: { $in: [_id] },
-      name: { $regex: new RegExp(q, "i") },
-    };
-  }
-  Event.find(roleBasedSearch)
-    .populate("customers")
-    .populate("products")
-    .sort([[_sort, _order === "DESC" ? -1 : 1]])
-    .then((events) => {
-      const slicedEvents = events.slice(_start, _end);
-      res.setHeader("X-Total-Count", events.length);
-      res.json(slicedEvents);
-    })
-    .catch((err) => next(err));
-});
-
-router.get("/events-role/:eventId", (req, res, next) => {
-  const { eventId } = req.params;
-  Event.findById({ _id: eventId })
-    .then((events) => {
-      res.json(events);
-    })
-    .catch((err) => next(err));
-});
-
-router.put("/events-role/:eventId", (req, res, next) => {
-  const { eventId } = req.params;
-  Event.findByIdAndUpdate({ _id: eventId }, req.body)
-    .then((events) => {
-      res.json(events);
-    })
-    .catch((err) => next(err));
-});
-
-router.get("/staff", async (req, res, next) => {
+router.get("/", async (req, res, next) => {
   try {
     const { _end, _order, _sort, _start, q = "" } = req.query;
-    const { role, _id } = req.payload;
+    const { _id } = req.payload;
     const staff = await User.find({
       /*       $and: [
-        { name: { $regex: new RegExp("^" + q, "i") } },
-        { role: "event-staff" },
-      ], */
+          { name: { $regex: new RegExp("^" + q, "i") } },
+          { role: "event-staff" },
+        ], */
       name: { $regex: new RegExp(q, "i") },
       $or: [{ role: "event-staff" }, { role: "event-admin" }],
     })
       .populate("events")
       .sort([[_sort, _order === "DESC" ? -1 : 1]]);
-    if (role !== "app-admin") {
-      const filterByEventAdmin = await Event.find({ admins: { $in: [_id] } });
-      const filteredStaffEventbyAdmin = staff.filter((staff) => {
-        return filterByEventAdmin.some((event) => {
-          return (
-            event.staff.includes(staff._id) || event.admins.includes(staff._id)
-          );
-        });
+    const filterByEventAdmin = await Event.find({ admins: { $in: [_id] } });
+    const filteredStaffEventbyAdmin = staff.filter((staff) => {
+      return filterByEventAdmin.some((event) => {
+        return (
+          event.staff.includes(staff._id) || event.admins.includes(staff._id)
+        );
       });
-      const slicedFilteredStaffEventbyAdmin = filteredStaffEventbyAdmin.slice(
-        _start,
-        _end
-      );
-      res.setHeader("X-Total-Count", filteredStaffEventbyAdmin.length);
-      res.json(slicedFilteredStaffEventbyAdmin);
-    } else {
-      const slicedStaff = staff.slice(_start, _end);
-      res.setHeader("X-Total-Count", staff.length);
-      res.json(slicedStaff);
-    }
-  } catch (error) {
-    next(error);
+    });
+    const slicedFilteredStaffEventbyAdmin = filteredStaffEventbyAdmin.slice(
+      _start,
+      _end
+    );
+    res.setHeader("X-Total-Count", filteredStaffEventbyAdmin.length);
+    res.json(slicedFilteredStaffEventbyAdmin);
+  } catch (err) {
+    next(err);
   }
 });
 
-router.get("/staff/:userId", async (req, res, next) => {
+router.get("/:userId", async (req, res, next) => {
   try {
     const { userId } = req.params;
     const staff = await User.findById(userId).populate("events");
     res.json(staff);
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 });
 
-router.put("/staff/:userId", async (req, res, next) => {
+router.put("/:userId", async (req, res, next) => {
   try {
     const { userId } = req.params;
 
@@ -127,12 +81,12 @@ router.put("/staff/:userId", async (req, res, next) => {
       { multi: true }
     );
     res.json(staff);
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 });
 
-router.delete("/staff/:userId", async (req, res, next) => {
+router.delete("/:userId", async (req, res, next) => {
   try {
     const { userId } = req.params;
     const deletedUser = await User.findByIdAndRemove(userId);
@@ -144,15 +98,14 @@ router.delete("/staff/:userId", async (req, res, next) => {
       { multi: true }
     );
     res.json(deletedUser);
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 });
 
-router.post("/staff", async (req, res, next) => {
+router.post("/", async (req, res, next) => {
   try {
-    const { role } = req.payload;
-    if (role !== "app-admin" && req.body.role !== "app-admin") {
+    if (req.body.role !== "app-admin") {
       const chosenEvents = req.body.eventsrole.filter(
         (event) => typeof event === "string"
       );
@@ -175,11 +128,11 @@ router.post("/staff", async (req, res, next) => {
       res.json(staff);
     } else {
       return res.status(400).json({
-        errorMessage: "You do not have permission to create this type of user.",
+        errMessage: "You do not have permission to create this type of user.",
       });
     }
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 });
 
