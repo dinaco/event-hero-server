@@ -2,6 +2,8 @@ const router = require("express").Router();
 const User = require("../models/User.model");
 const Event = require("../models/Event.model");
 
+const mongoose = require("mongoose");
+
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
@@ -74,9 +76,6 @@ router.get("/:userId", async (req, res, next) => {
 });
 
 router.post("/", async (req, res, next) => {
-  //TODO: Probably not saving information at all places it needs because map reading is undefined for event-roles
-  // only for newly created users
-
   try {
     const { _id } = req.payload;
     if (req.body.role !== "app-admin") {
@@ -86,10 +85,11 @@ router.post("/", async (req, res, next) => {
       const checkAdminEventIds = checkAdminEvent.events.map((event) =>
         event._id.toString()
       );
-      const chosenEvents = req.body.eventsrole.filter(
+      let chosenEvents = req.body.eventsrole.filter(
         (event) => typeof event === "string"
       );
       if (chosenEvents.every((event) => checkAdminEventIds.includes(event))) {
+        chosenEvents = chosenEvents.map((e) => mongoose.Types.ObjectId(e));
         req.body.events = chosenEvents;
         let pushNewUserId;
         const salt = await bcrypt.genSalt(saltRounds);
