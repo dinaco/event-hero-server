@@ -37,6 +37,7 @@ router.get("/users/:id", (req, res, next) => {
     .catch((err) => next(err));
 });
 router.put("/users/:id", async (req, res, next) => {
+  //console.log(req.body);
   try {
     const { id } = req.params;
     const userInfo = await User.findById(id);
