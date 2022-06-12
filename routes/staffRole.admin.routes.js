@@ -74,30 +74,45 @@ router.get("/:userId", async (req, res, next) => {
 });
 
 router.post("/", async (req, res, next) => {
-  //TODO: check if event "belongs to this user"
+  //TODO: Probably not saving information at all places it needs because map reading is undefined for event-roles
+  // only for newly created users
 
   try {
+    const { _id } = req.payload;
     if (req.body.role !== "app-admin") {
+      const checkAdminEvent = await User.findById(_id, {
+        role: "event-admin",
+      }).populate("events");
+      const checkAdminEventIds = checkAdminEvent.events.map((event) =>
+        event._id.toString()
+      );
       const chosenEvents = req.body.eventsrole.filter(
         (event) => typeof event === "string"
       );
-      req.body.events = chosenEvents;
-      let pushNewUserId;
-      const salt = await bcrypt.genSalt(saltRounds);
-      const hashedPassword = await bcrypt.hash(req.body.hashedPassword, salt);
-      req.body.hashedPassword = hashedPassword;
-      const staff = await User.create(req.body);
-      req.body.role === "event-staff"
-        ? (pushNewUserId = { staff: staff._id })
-        : (pushNewUserId = { admins: staff._id });
-      const event = await Event.updateMany(
-        {
-          _id: { $in: req.body.events },
-        },
-        { $push: pushNewUserId },
-        { multi: true }
-      );
-      res.json(staff);
+      if (chosenEvents.every((event) => checkAdminEventIds.includes(event))) {
+        req.body.events = chosenEvents;
+        let pushNewUserId;
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hashedPassword = await bcrypt.hash(req.body.hashedPassword, salt);
+        req.body.hashedPassword = hashedPassword;
+        const staff = await User.create(req.body);
+        req.body.role === "event-staff"
+          ? (pushNewUserId = { staff: staff._id })
+          : (pushNewUserId = { admins: staff._id });
+        const event = await Event.updateMany(
+          {
+            _id: { $in: req.body.events },
+          },
+          { $push: pushNewUserId },
+          { multi: true }
+        );
+        res.json(staff);
+      } else {
+        return res.status(400).json({
+          errMessage:
+            "You do not have permission to create a user for these events.",
+        });
+      }
     } else {
       return res.status(400).json({
         errMessage: "You do not have permission to create this type of user.",
