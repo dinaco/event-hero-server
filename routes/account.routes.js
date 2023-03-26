@@ -1,24 +1,29 @@
-const router = require("express").Router();
-const User = require("../models/User.model");
-const Event = require("../models/Event.model");
-const Order = require("../models/Order.model");
+const router = require('express').Router();
+const User = require('../models/User.model');
+const Event = require('../models/Event.model');
+const Order = require('../models/Order.model');
 
-const bcrypt = require("bcrypt");
+const bcrypt = require('bcrypt');
 
 //TODO: check if staff is related to the event before performing any CRUD
 
 // How many rounds should bcrypt run the salt (default [10 - 12 rounds])
 const saltRounds = 10;
 
-router.get("/my-events", (req, res, next) => {
+router.get('/my-events', (req, res, next) => {
   const { _id } = req.payload;
   User.findById(_id)
     .populate({
-      path: "events",
+      path: 'events',
       //   options: { date: { $gte: new Date() }, sort: { date: 1 } },
-      populate: {
-        path: "customers",
-      },
+      populate: [
+        {
+          path: 'customers',
+        },
+        {
+          path: 'staff',
+        },
+      ],
     })
     .then((data) => {
       res.json(data);
@@ -26,21 +31,21 @@ router.get("/my-events", (req, res, next) => {
     .catch((err) => next(err));
 });
 
-router.get("/profile", (req, res, next) => {
+router.get('/profile', (req, res, next) => {
   const { _id } = req.payload;
   User.findById(_id)
     .then((user) => res.json(user))
     .catch((err) => next(err));
 });
 
-router.put("/profile", async (req, res, next) => {
+router.put('/profile', async (req, res, next) => {
   try {
     const { _id, email: payloadEmail } = req.payload;
     const { name, email, password } = req.body;
     if (email !== payloadEmail) {
       const checkEmail = await User.findOne({ email });
       if (checkEmail) {
-        return res.status(400).json({ errorMessage: "Email already taken." });
+        return res.status(400).json({ errorMessage: 'Email already taken.' });
       }
     }
 
@@ -53,7 +58,7 @@ router.put("/profile", async (req, res, next) => {
     } else {
       if (password.length < 8) {
         return res.status(400).json({
-          errorMessage: "Your password needs to be at least 8 characters long.",
+          errorMessage: 'Your password needs to be at least 8 characters long.',
         });
       }
       const salt = await bcrypt.genSalt(saltRounds);
@@ -71,14 +76,14 @@ router.put("/profile", async (req, res, next) => {
   }
 });
 
-router.delete("/profile", (req, res, next) => {
+router.delete('/profile', (req, res, next) => {
   const { _id } = req.payload;
   User.findByIdAndRemove(_id)
     .then((user) => res.json(user))
     .catch((err) => next(err));
 });
 
-router.put("/add-funds", (req, res, next) => {
+router.put('/add-funds', (req, res, next) => {
   const { _id } = req.payload;
   const { amount } = req.body;
   User.findByIdAndUpdate(_id, { $inc: { balance: amount } })
@@ -88,7 +93,7 @@ router.put("/add-funds", (req, res, next) => {
     .catch((err) => next(err));
 });
 
-router.get("/order/:eventId", (req, res, next) => {
+router.get('/order/:eventId', (req, res, next) => {
   const { eventId } = req.params;
   Event.findById(eventId)
     .then((event) => {
@@ -97,16 +102,16 @@ router.get("/order/:eventId", (req, res, next) => {
     .catch((err) => next(err));
 });
 
-router.get("/orders/:eventId", (req, res, next) => {
+router.get('/orders/:eventId', (req, res, next) => {
   const { eventId } = req.params;
   const { _id } = req.payload;
   User.findById(_id)
     .populate({
-      path: "events",
+      path: 'events',
       match: { _id: eventId },
     })
     .populate({
-      path: "orders",
+      path: 'orders',
       match: { event: eventId },
     })
     .then((event) => {
@@ -115,44 +120,44 @@ router.get("/orders/:eventId", (req, res, next) => {
     .catch((err) => next(err));
 });
 
-router.get("/order/status/:orderId", async (req, res, next) => {
+router.get('/order/status/:orderId', async (req, res, next) => {
   const { orderId } = req.params;
   const { _id, role } = req.payload;
   try {
     const orderInfo = await Order.findById(orderId)
-      .populate("event")
-      .populate("staff")
-      .populate("customer");
+      .populate('event')
+      .populate('staff')
+      .populate('customer');
     if (orderInfo) {
-      if (role === "customer" && _id == orderInfo.customer._id) {
+      if (role === 'customer' && _id == orderInfo.customer._id) {
         res.json(orderInfo);
-      } else if (role === "event-staff" && _id == orderInfo.staff._id) {
+      } else if (role === 'event-staff' && _id == orderInfo.staff._id) {
         res.json(orderInfo);
       } else {
-        return res.status(400).json({ errorMessage: "Order not found." });
+        return res.status(400).json({ errorMessage: 'Order not found.' });
       }
     } else {
-      return res.status(400).json({ errorMessage: "Order not found." });
+      return res.status(400).json({ errorMessage: 'Order not found.' });
     }
   } catch (error) {
     next(error);
   }
 });
 
-router.put("/order/process/:orderId", async (req, res, next) => {
+router.put('/order/process/:orderId', async (req, res, next) => {
   const { orderId } = req.params;
   const { _id, role } = req.payload;
 
   try {
-    const eventTakingOrders = await Order.findById(orderId).populate("event");
+    const eventTakingOrders = await Order.findById(orderId).populate('event');
     if (eventTakingOrders.event.takeOrders) {
-      if (role === "event-staff") {
+      if (role === 'event-staff') {
         const orderInfo = await Order.findByIdAndUpdate(
           orderId,
-          { $set: { status: "processing", staff: _id } },
+          { $set: { status: 'processing', staff: _id } },
           { upsert: true }
         );
-        if (orderInfo.status === "pending") {
+        if (orderInfo.status === 'pending') {
           const staff = await User.findByIdAndUpdate(
             _id,
             { $push: { orders: orderId } },
@@ -161,17 +166,17 @@ router.put("/order/process/:orderId", async (req, res, next) => {
         }
 
         res.json(orderInfo);
-        req.app.io.emit("orderChange", eventTakingOrders);
+        req.app.io.emit('orderChange', eventTakingOrders);
       } else {
         return res.status(400).json({
           errorMessage:
-            "This action can only be performed by staff members, please contact event admins",
+            'This action can only be performed by staff members, please contact event admins',
         });
       }
     } else {
       return res.status(400).json({
         errorMessage:
-          "This event is not taking orders at the moment. Contact event admin.",
+          'This event is not taking orders at the moment. Contact event admin.',
       });
     }
   } catch (error) {
@@ -179,28 +184,28 @@ router.put("/order/process/:orderId", async (req, res, next) => {
   }
 });
 
-router.put("/order/charge/:orderId", async (req, res, next) => {
+router.put('/order/charge/:orderId', async (req, res, next) => {
   const { orderId } = req.params;
   const { role } = req.payload;
 
   try {
-    if (role === "event-staff") {
+    if (role === 'event-staff') {
       const orderCheckUserBalance = await Order.findById(orderId).populate(
-        "customer"
+        'customer'
       );
       if (
         orderCheckUserBalance.customer.balance < orderCheckUserBalance.total
       ) {
         return res.status(400).json({
           errorMessage:
-            "Insuficient balance. Customer needs to add more funds.",
+            'Insuficient balance. Customer needs to add more funds.',
         });
       }
-      const orderInfo = await Order.findById(orderId).populate("event");
-      if (orderInfo.status === "processing" && orderInfo.event.takeOrders) {
+      const orderInfo = await Order.findById(orderId).populate('event');
+      if (orderInfo.status === 'processing' && orderInfo.event.takeOrders) {
         const updateOrder = await Order.findByIdAndUpdate(
           orderId,
-          { $set: { status: "completed" } },
+          { $set: { status: 'completed' } },
           { upsert: true, new: true }
         );
         const updateUser = await User.findByIdAndUpdate(
@@ -210,7 +215,7 @@ router.put("/order/charge/:orderId", async (req, res, next) => {
         );
 
         res.json(updateUser);
-        req.app.io.emit("orderChange", updateUser);
+        req.app.io.emit('orderChange', updateUser);
       } else {
         return res.status(400).json({
           errorMessage: `Check if order status is "processing" or contact event admin for further information`,
@@ -219,7 +224,7 @@ router.put("/order/charge/:orderId", async (req, res, next) => {
     } else {
       return res.status(400).json({
         errorMessage:
-          "This action can only be performed by staff members, please contact event admins",
+          'This action can only be performed by staff members, please contact event admins',
       });
     }
   } catch (error) {
@@ -227,13 +232,13 @@ router.put("/order/charge/:orderId", async (req, res, next) => {
   }
 });
 
-router.delete("/order/delete/:orderId", async (req, res, next) => {
+router.delete('/order/delete/:orderId', async (req, res, next) => {
   const { orderId } = req.params;
   const { role } = req.payload;
-  if (role === "customer") {
+  if (role === 'customer') {
     try {
       let orderToDelete = await Order.findById(orderId);
-      if (orderToDelete.status === "completed") {
+      if (orderToDelete.status === 'completed') {
         return res.status(400).json({
           errorMessage: "This order is completed and can't be deleted",
         });
@@ -259,7 +264,7 @@ router.delete("/order/delete/:orderId", async (req, res, next) => {
 
         let orderToRemove = await Order.findByIdAndRemove(orderId);
         res.json(orderToRemove);
-        req.app.io.emit("orderChange", orderToRemove);
+        req.app.io.emit('orderChange', orderToRemove);
       }
     } catch (error) {
       next(error);
@@ -272,23 +277,23 @@ router.delete("/order/delete/:orderId", async (req, res, next) => {
   }
 });
 
-router.post("/order/:eventId", async (req, res, next) => {
+router.post('/order/:eventId', async (req, res, next) => {
   try {
     const { eventId } = req.params;
 
     const eventInfo = await Event.findById(eventId);
     if (!eventInfo.takeOrders) {
       return res.status(400).json({
-        errorMessage: "This event is not taking orders. Contact event admin.",
+        errorMessage: 'This event is not taking orders. Contact event admin.',
       });
     }
 
     const { _id, role } = req.payload;
-    if (role === "customer") {
+    if (role === 'customer') {
       const newArr = [];
       const ids = [];
-      const letters = "0123456789ABCDEF";
-      let bgColor = "#";
+      const letters = '0123456789ABCDEF';
+      let bgColor = '#';
       for (let i = 0; i < 6; i++) {
         bgColor += letters[Math.floor(Math.random() * 16)];
       }
@@ -310,14 +315,14 @@ router.post("/order/:eventId", async (req, res, next) => {
       if (total <= 0) {
         return res.status(400).json({
           errorMessage:
-            "There is an error with your order. Order total under 0",
+            'There is an error with your order. Order total under 0',
         });
       }
       const customerInfo = await User.findById(_id);
       if (customerInfo.balance < total) {
         return res.status(400).json({
           errorMessage:
-            "Insuficient balance. Please add balance to your account",
+            'Insuficient balance. Please add balance to your account',
         });
       }
 
