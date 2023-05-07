@@ -1,35 +1,45 @@
-const router = require("express").Router();
-const Event = require("../models/Event.model");
-const User = require("../models/User.model");
+const router = require('express').Router();
+const Event = require('../models/Event.model');
+const User = require('../models/User.model');
 
-const { isAuthenticated } = require("../middleware/jwt.middleware");
+const { isAuthenticated } = require('../middleware/jwt.middleware');
 
-router.get("/events", (req, res, next) => {
+router.get('/events', async (req, res, next) => {
   let newDate = new Date();
-  const { q = "" } = req.query;
+  const { q = '', limit = 2, page = 1 } = req.query;
   newDate.setDate(newDate.getDate() - 1);
 
-  Event.find({
-    name: { $regex: new RegExp(q, "i") },
+  const queryVars = {
+    name: { $regex: new RegExp(q, 'i') },
     date: { $gte: newDate },
-  })
-    .populate("customers")
-    .sort({ date: 1 })
-    .then((events) => {
-      res.json(events);
-    })
-    .catch((err) => next(err));
+  };
+  try {
+    const events = await Event.find(queryVars)
+      .populate('customers')
+      .sort({ date: 1 })
+      .limit(limit)
+      .skip((page - 1) * limit);
+
+    const count = await Event.countDocuments(queryVars);
+
+    res.json({
+      ...events,
+      nextCursor: Math.ceil(count / limit) > page ? page * 1 + 1 : undefined,
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
-router.get("/products/:eventId", isAuthenticated, (req, res, next) => {
+router.get('/products/:eventId', isAuthenticated, (req, res, next) => {
   const { eventId } = req.params;
   const { _id } = req.payload;
   User.findById(_id)
     .populate({
-      path: "events",
+      path: 'events',
       match: { _id: eventId },
       populate: {
-        path: "products",
+        path: 'products',
         match: { active: true },
       },
     })
@@ -39,27 +49,27 @@ router.get("/products/:eventId", isAuthenticated, (req, res, next) => {
     .catch((err) => next(err));
 });
 
-router.get("/event/:eventId", (req, res, next) => {
+router.get('/event/:eventId', (req, res, next) => {
   const { eventId } = req.params;
   Event.findById(eventId)
-    .populate("customers")
-    .populate("staff")
+    .populate('customers')
+    .populate('staff')
     .then((event) => {
       if (!event.active) {
         return res
           .status(400)
-          .json({ errorMessage: "Event blocked! Contact Admin" });
+          .json({ errorMessage: 'Event blocked! Contact Admin' });
       }
       res.json(event);
     })
     .catch((err) => next(err));
 });
 
-router.put("/event/:eventId", isAuthenticated, (req, res, next) => {
+router.put('/event/:eventId', isAuthenticated, (req, res, next) => {
   const { attending } = req.body;
   const { _id, role } = req.payload;
   const { eventId } = req.params;
-  if (attending && role === "customer") {
+  if (attending && role === 'customer') {
     Event.findByIdAndUpdate(eventId, {
       $pull: {
         customers: _id,
@@ -74,7 +84,7 @@ router.put("/event/:eventId", isAuthenticated, (req, res, next) => {
       )
       .then((event) => res.json(event))
       .catch((err) => next(err));
-  } else if (role === "customer") {
+  } else if (role === 'customer') {
     Event.findByIdAndUpdate(eventId, {
       $push: {
         customers: _id,
@@ -92,7 +102,7 @@ router.put("/event/:eventId", isAuthenticated, (req, res, next) => {
   } else {
     return res.status(400).json({
       errorMessage:
-        "This account is not authorized to perform this action. Contact event admin",
+        'This account is not authorized to perform this action. Contact event admin',
     });
   }
 });
