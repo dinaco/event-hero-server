@@ -23,7 +23,7 @@ router.get('/events', async (req, res, next) => {
     const count = await Event.countDocuments(queryVars);
 
     res.json({
-      ...events,
+      events,
       nextCursor: Math.ceil(count / limit) > page ? page * 1 + 1 : undefined,
     });
   } catch (err) {
